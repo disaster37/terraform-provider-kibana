@@ -1,8 +1,6 @@
 package kb
 
 import (
-	"crypto/tls"
-	"net/http"
 	"net/url"
 
 	kibana7 "github.com/disaster37/go-kibana-rest"
@@ -34,11 +32,13 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("KIBANA_PASSWORD", nil),
 				Description: "Password to use to connect to Kibana using basic auth",
 			},
-			"cacert_file": {
-				Type:        schema.TypeString,
+			"cacert_files": {
+				Type:        schema.TypeSet,
 				Optional:    true,
-				Default:     "",
-				Description: "A Custom CA certificate",
+				Description: "A Custom CA certificates path",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"insecure": {
 				Type:        schema.TypeBool,
@@ -58,17 +58,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	var (
 		relevantClient interface{}
-		data           map[string]interface{}
 	)
 
 	URL := d.Get("url").(string)
 	insecure := d.Get("insecure").(bool)
-	cacertFile := d.Get("cacert_file").(string)
+	cacertFiles := convertArrayInterfaceToArrayString(d.Get("cacert_files").(*schema.Set).List())
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{},
-	}
 	// Checks is valid URL
 	if _, err := url.Parse(URL); err != nil {
 		return nil, err
@@ -77,6 +73,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	// Intialise connexion
 	cfg := kibana7.Config{
 		Address: URL,
+		CAs:     cacertFiles,
 	}
 	if username != "" && password != "" {
 		cfg.Username = username
@@ -85,17 +82,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if insecure == true {
 		cfg.DisableVerifySSL = true
 	}
-	// If a cacertFile has been specified, use that for cert validation
-	/*
-		if cacertFile != "" {
-			caCert, _, _ := pathorcontents.Read(cacertFile)
 
-			caCertPool := x509.NewCertPool()
-			caCertPool.AppendCertsFromPEM([]byte(caCert))
-			transport.TLSClientConfig.RootCAs = caCertPool
-		}
-		cfg.Transport = transport
-	*/
 	client, err := kibana7.NewClient(cfg)
 	if err != nil {
 		return nil, err
