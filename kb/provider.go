@@ -50,6 +50,7 @@ func Provider() terraform.ResourceProvider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"kibana_user_space": resourceKibanaUserSpace(),
+			"kibana_role":       resourceKibanaRole(),
 		},
 
 		ConfigureFunc: providerConfigure,
