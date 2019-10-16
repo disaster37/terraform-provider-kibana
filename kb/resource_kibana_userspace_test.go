@@ -101,6 +101,6 @@ resource "kibana_user_space" "test" {
   description 		= "test"
   initials			= "tt"
   color				= "#000000"
-  disabled_features = ["canvas", "maps", "advancedSettings", "indexPatterns", "graph", "monitoring", "ml", "apm", "infrastructure", "logs", "siem", ]
+  disabled_features = ["canvas", "maps", "advancedSettings", "indexPatterns", "graph", "monitoring", "ml", "apm", "infrastructure", "logs", "siem"]
 }
 `
