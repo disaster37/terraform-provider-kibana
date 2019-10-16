@@ -2,6 +2,9 @@ TEST?=./...
 PKG_NAME=kb
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 WEBSITE_REPO=github.com/hashicorp/terraform-website
+KIBANA_URL ?= http://127.0.0.1:5601
+KIBANA_USERNAME ?= elastic
+KIBANA_PASSWORD ?= changeme
 
 default: build
 
@@ -16,7 +19,7 @@ test: fmtcheck
 	go test $(TEST) -timeout=30s -parallel=4
 
 testacc: fmt fmtcheck
-	TF_ACC=1 go test $(TEST) -v -count 1 -parallel 1 $(TESTARGS) -timeout 120m
+	KIBANA_URL=${KIBANA_URL} KIBANA_USERNAME=${KIBANA_USERNAME} KIBANA_PASSWORD=${KIBANA_PASSWORD} TF_ACC=1 go test $(TEST) -v -count 1 -parallel 1 $(TESTARGS) -timeout 120m
 
 fmt:
 	@echo "==> Fixing source code with gofmt..."
