@@ -2,6 +2,7 @@
 // API documentation: https://www.elastic.co/guide/en/kibana/master/role-management-api.html
 // Supported version:
 //  - v7
+
 package kb
 
 import (
@@ -60,13 +61,13 @@ func resourceKibanaRole() *schema.Resource {
 										Type:             schema.TypeString,
 										Optional:         true,
 										Default:          "{}",
-										DiffSuppressFunc: suppressEquivalentJson,
+										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 									"field_security": {
 										Type:             schema.TypeString,
 										Optional:         true,
 										Default:          "{}",
-										DiffSuppressFunc: suppressEquivalentJson,
+										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 								},
 							},
@@ -133,7 +134,7 @@ func resourceKibanaRole() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Default:          "{}",
-				DiffSuppressFunc: suppressEquivalentJson,
+				DiffSuppressFunc: suppressEquivalentJSON,
 			},
 		},
 	}
@@ -218,9 +219,9 @@ func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 			log.Warnf("Role %s not found - removing from state", id)
 			d.SetId("")
 			return nil
-		} else {
-			return err
 		}
+		return err
+
 	}
 
 	d.SetId("")
@@ -233,7 +234,7 @@ func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 // createRole permit to create or update role in Kibana
 func createRole(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
-	metadataTemp := optionalInterfaceJson(d.Get("metadata").(string))
+	metadataTemp := optionalInterfaceJSON(d.Get("metadata").(string))
 	roleElasticsearch := buildRolesElasticsearch(d.Get("elasticsearch").(*schema.Set).List())
 	roleKibana := buildRolesKibana(d.Get("kibana").(*schema.Set).List())
 
@@ -290,7 +291,7 @@ func buildKibanaRoleElasticsearchIndice(raws []interface{}) []kbapi.KibanaRoleEl
 	kibanaRoleElasticsearchIndices := make([]kbapi.KibanaRoleElasticsearchIndice, len(raws))
 	for i, raw := range raws {
 		m := raw.(map[string]interface{})
-		fieldSecurityTemp := optionalInterfaceJson(m["field_security"].(string))
+		fieldSecurityTemp := optionalInterfaceJSON(m["field_security"].(string))
 		var fieldSecurity map[string]interface{}
 		if fieldSecurityTemp != nil {
 			fieldSecurity = fieldSecurityTemp.(map[string]interface{})
@@ -300,7 +301,7 @@ func buildKibanaRoleElasticsearchIndice(raws []interface{}) []kbapi.KibanaRoleEl
 		kibanaRoleElasticsearchIndice := kbapi.KibanaRoleElasticsearchIndice{
 			Names:         convertArrayInterfaceToArrayString(m["names"].(*schema.Set).List()),
 			Privileges:    convertArrayInterfaceToArrayString(m["privileges"].(*schema.Set).List()),
-			Query:         optionalInterfaceJson(m["query"].(string)),
+			Query:         optionalInterfaceJSON(m["query"].(string)),
 			FieldSecurity: fieldSecurity,
 		}
 

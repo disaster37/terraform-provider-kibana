@@ -2,6 +2,7 @@
 // API documentation: https://www.elastic.co/guide/en/kibana/master/spaces-api.html
 // Supported version:
 //  - v7
+
 package kb
 
 import (
@@ -163,9 +164,9 @@ func resourceKibanaUserSpaceDelete(d *schema.ResourceData, meta interface{}) err
 			log.Warnf("User space %s not found - removing from state", id)
 			d.SetId("")
 			return nil
-		} else {
-			return err
 		}
+		return err
+
 	}
 
 	d.SetId("")

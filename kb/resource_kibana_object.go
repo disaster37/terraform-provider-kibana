@@ -2,6 +2,7 @@
 // API documentation: https://www.elastic.co/guide/en/kibana/master/saved-objects-api.html
 // Supported version:
 //  - v7
+
 package kb
 
 import (
@@ -36,7 +37,7 @@ func resourceKibanaObject() *schema.Resource {
 			"data": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: suppressEquivalentJson,
+				DiffSuppressFunc: suppressEquivalentJSON,
 			},
 			"export_types": {
 				Type:     schema.TypeSet,
