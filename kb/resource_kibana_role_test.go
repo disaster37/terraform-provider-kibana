@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	kibana7 "github.com/disaster37/go-kibana-rest"
+	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/pkg/errors"
@@ -47,19 +47,13 @@ func testCheckKibanaRoleExists(name string) resource.TestCheckFunc {
 
 		meta := testAccProvider.Meta()
 
-		switch meta.(type) {
-		// v7
-		case *kibana7.Client:
-			client := meta.(*kibana7.Client)
-			role, err := client.API.KibanaRoleManagement.Get(rs.Primary.ID)
-			if err != nil {
-				return err
-			}
-			if role == nil {
-				return errors.Errorf("role %s not found", rs.Primary.ID)
-			}
-		default:
-			return errors.New("Role is only supported by the kibana library >= v6!")
+		client := meta.(*kibana.Client)
+		role, err := client.API.KibanaRoleManagement.Get(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if role == nil {
+			return errors.Errorf("role %s not found", rs.Primary.ID)
 		}
 
 		return nil
@@ -74,19 +68,13 @@ func testCheckKibanaRoleDestroy(s *terraform.State) error {
 
 		meta := testAccProvider.Meta()
 
-		switch meta.(type) {
-		// v7
-		case *kibana7.Client:
-			client := meta.(*kibana7.Client)
-			role, err := client.API.KibanaRoleManagement.Get(rs.Primary.ID)
-			if err != nil {
-				return err
-			}
-			if role == nil {
-				return nil
-			}
-		default:
-			return errors.New("Role is only supported by the kibana library >= v6!")
+		client := meta.(*kibana.Client)
+		role, err := client.API.KibanaRoleManagement.Get(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if role == nil {
+			return nil
 		}
 
 		return fmt.Errorf("Role %q still exists", rs.Primary.ID)

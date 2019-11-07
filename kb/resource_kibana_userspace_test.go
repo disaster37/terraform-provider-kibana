@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	kibana7 "github.com/disaster37/go-kibana-rest"
+	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/pkg/errors"
@@ -47,19 +47,13 @@ func testCheckKibanaUserSpaceExists(name string) resource.TestCheckFunc {
 
 		meta := testAccProvider.Meta()
 
-		switch meta.(type) {
-		// v7
-		case *kibana7.Client:
-			client := meta.(*kibana7.Client)
-			userSpace, err := client.API.KibanaSpaces.Get(rs.Primary.ID)
-			if err != nil {
-				return err
-			}
-			if userSpace == nil {
-				return errors.Errorf("User space %s not found", rs.Primary.ID)
-			}
-		default:
-			return errors.New("User space is only supported by the kibana library >= v6!")
+		client := meta.(*kibana.Client)
+		userSpace, err := client.API.KibanaSpaces.Get(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if userSpace == nil {
+			return errors.Errorf("User space %s not found", rs.Primary.ID)
 		}
 
 		return nil
@@ -74,19 +68,13 @@ func testCheckKibanaUserSpaceDestroy(s *terraform.State) error {
 
 		meta := testAccProvider.Meta()
 
-		switch meta.(type) {
-		// v7
-		case *kibana7.Client:
-			client := meta.(*kibana7.Client)
-			userSpace, err := client.API.KibanaSpaces.Get(rs.Primary.ID)
-			if err != nil {
-				return err
-			}
-			if userSpace == nil {
-				return nil
-			}
-		default:
-			return errors.New("User space is only supported by the kibana library >= v6!")
+		client := meta.(*kibana.Client)
+		userSpace, err := client.API.KibanaSpaces.Get(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if userSpace == nil {
+			return nil
 		}
 
 		return fmt.Errorf("User space %q still exists", rs.Primary.ID)

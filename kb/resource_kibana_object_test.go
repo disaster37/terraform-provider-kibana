@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	kibana7 "github.com/disaster37/go-kibana-rest"
+	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/pkg/errors"
@@ -46,22 +46,17 @@ func testCheckKibanaObjectExists(name string) resource.TestCheckFunc {
 		exportObject["id"] = "logstash-log-*"
 		exportObject["type"] = "index-pattern"
 		exportObjects := []map[string]string{exportObject}
+		space := "default"
 
 		meta := testAccProvider.Meta()
 
-		switch meta.(type) {
-		// v7
-		case *kibana7.Client:
-			client := meta.(*kibana7.Client)
-			data, err := client.API.KibanaSavedObject.Export(nil, exportObjects, deepReference)
-			if err != nil {
-				return err
-			}
-			if len(data) == 0 {
-				return errors.Errorf("Object %s not found", rs.Primary.ID)
-			}
-		default:
-			return errors.New("Object is only supported by the kibana library >= v6!")
+		client := meta.(*kibana.Client)
+		data, err := client.API.KibanaSavedObject.Export(nil, exportObjects, deepReference, space)
+		if err != nil {
+			return err
+		}
+		if len(data) == 0 {
+			return errors.Errorf("Object %s not found", rs.Primary.ID)
 		}
 
 		return nil

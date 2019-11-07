@@ -7,14 +7,13 @@ package kb
 import (
 	"fmt"
 
-	kibana7 "github.com/disaster37/go-kibana-rest"
+	kibana "github.com/disaster37/go-kibana-rest/v7"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
-// Resource specification to handle user space in Kibana
+// Resource specification to handle kibana save object
 func resourceKibanaObject() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceKibanaObjectCreate,
@@ -27,6 +26,12 @@ func resourceKibanaObject() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+			},
+			"space": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "default",
 			},
 			"data": {
 				Type:             schema.TypeString,
@@ -88,36 +93,34 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 	exportTypes := convertArrayInterfaceToArrayString(d.Get("export_types").(*schema.Set).List())
 	exportObjects := buildExportObjects(d.Get("export_objects").(*schema.Set).List())
 	deepReference := d.Get("deep_reference").(bool)
+	space := d.Get("space").(string)
 
 	log.Debugf("Object id:  %s", id)
 	log.Debugf("Export types: %+v", exportTypes)
 	log.Debugf("Export Objects: %+v", exportObjects)
+	log.Debugf("Space: %s", space)
 
-	// Use the right client depend to Kibana version
-	switch meta.(type) {
-	// v7
-	case *kibana7.Client:
-		client := meta.(*kibana7.Client)
+	client := meta.(*kibana.Client)
 
-		data, err := client.API.KibanaSavedObject.Export(exportTypes, exportObjects, deepReference)
-		if err != nil {
-			return err
-		}
-
-		if len(data) == 0 {
-			fmt.Printf("[WARN] Export object %s not found - removing from state", id)
-			log.Warnf("Export object %s not found - removing from state", id)
-			d.SetId("")
-			return nil
-		}
-
-		log.Debugf("Export object %s successfully:\n%+v", id, data)
-
-		d.Set("name", id)
-		d.Set("data", data)
-	default:
-		return errors.New("Object is only supported by the kibana library >= v6!")
+	data, err := client.API.KibanaSavedObject.Export(exportTypes, exportObjects, deepReference, space)
+	if err != nil {
+		return err
 	}
+
+	if len(data) == 0 {
+		fmt.Printf("[WARN] Export object %s not found - removing from state", id)
+		log.Warnf("Export object %s not found - removing from state", id)
+		d.SetId("")
+		return nil
+	}
+
+	log.Debugf("Export object %s successfully:\n%+v", id, data)
+
+	d.Set("name", id)
+	d.Set("data", data)
+	d.Set("space", space)
+	d.Set("export_types", exportTypes)
+	d.Set("export_objects", exportObjects)
 
 	log.Infof("Export object %s successfully", id)
 
@@ -170,6 +173,7 @@ func buildExportObjects(raws []interface{}) []map[string]string {
 // Import objects in Kibana
 func importObject(d *schema.ResourceData, meta interface{}) error {
 	data := d.Get("data").(string)
+	space := d.Get("space").(string)
 
 	log.Debugf("Data: %s", data)
 
@@ -178,19 +182,11 @@ func importObject(d *schema.ResourceData, meta interface{}) error {
 		err          error
 	)
 
-	// Use the right client depend to Kibana version
-	switch meta.(type) {
-	// v7
-	case *kibana7.Client:
-		client := meta.(*kibana7.Client)
+	client := meta.(*kibana.Client)
 
-		importedData, err = client.API.KibanaSavedObject.Import([]byte(data), true)
-		if err != nil {
-			return err
-		}
-
-	default:
-		return errors.New("Import object is only supported by the kibana library >= v6!")
+	importedData, err = client.API.KibanaSavedObject.Import([]byte(data), true, space)
+	if err != nil {
+		return err
 	}
 
 	log.Debugf("Imported object: %+v", importedData)

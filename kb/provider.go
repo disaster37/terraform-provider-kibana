@@ -3,7 +3,7 @@ package kb
 import (
 	"net/url"
 
-	kibana7 "github.com/disaster37/go-kibana-rest"
+	kibana "github.com/disaster37/go-kibana-rest/v7"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -75,7 +75,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	// Intialise connexion
-	cfg := kibana7.Config{
+	cfg := kibana.Config{
 		Address: URL,
 		CAs:     cacertFiles,
 	}
@@ -87,7 +87,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		cfg.DisableVerifySSL = true
 	}
 
-	client, err := kibana7.NewClient(cfg)
+	client, err := kibana.NewClient(cfg)
 	if err != nil {
 		return nil, err
 	}

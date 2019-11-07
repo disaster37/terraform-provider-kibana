@@ -7,11 +7,10 @@ package kb
 import (
 	"fmt"
 
-	kibana7 "github.com/disaster37/go-kibana-rest"
-	kbapi7 "github.com/disaster37/go-kibana-rest/kbapi"
+	kibana "github.com/disaster37/go-kibana-rest/v7"
+	kbapi "github.com/disaster37/go-kibana-rest/v7/kbapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -64,27 +63,20 @@ func resourceKibanaUserSpaceCreate(d *schema.ResourceData, meta interface{}) err
 	initials := d.Get("initials").(string)
 	color := d.Get("color").(string)
 
-	// Use the right client depend to Kibana version
-	switch meta.(type) {
-	// v7
-	case *kibana7.Client:
-		client := meta.(*kibana7.Client)
+	client := meta.(*kibana.Client)
 
-		userSpace := &kbapi7.KibanaSpace{
-			ID:               name,
-			Name:             name,
-			Description:      description,
-			DisabledFeatures: disabledFeatures,
-			Initials:         initials,
-			Color:            color,
-		}
+	userSpace := &kbapi.KibanaSpace{
+		ID:               name,
+		Name:             name,
+		Description:      description,
+		DisabledFeatures: disabledFeatures,
+		Initials:         initials,
+		Color:            color,
+	}
 
-		userSpace, err := client.API.KibanaSpaces.Create(userSpace)
-		if err != nil {
-			return err
-		}
-	default:
-		return errors.New("User space is only supported by the kibana library >= v6!")
+	userSpace, err := client.API.KibanaSpaces.Create(userSpace)
+	if err != nil {
+		return err
 	}
 
 	d.SetId(name)
@@ -101,34 +93,27 @@ func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error
 
 	log.Debugf("User space id:  %s", id)
 
-	// Use the right client depend to Kibana version
-	switch meta.(type) {
-	// v7
-	case *kibana7.Client:
-		client := meta.(*kibana7.Client)
+	client := meta.(*kibana.Client)
 
-		userSpace, err := client.API.KibanaSpaces.Get(id)
-		if err != nil {
-			return err
-		}
-
-		if userSpace == nil {
-			fmt.Printf("[WARN] User space %s not found - removing from state", id)
-			log.Warnf("User space %s not found - removing from state", id)
-			d.SetId("")
-			return nil
-		}
-
-		log.Debugf("Get user space %s successfully:\n%s", id, userSpace)
-
-		d.Set("name", id)
-		d.Set("description", userSpace.Description)
-		d.Set("disabled_features", userSpace.DisabledFeatures)
-		d.Set("initials", userSpace.Initials)
-		d.Set("color", userSpace.Color)
-	default:
-		return errors.New("User space is only supported by the kibana library >= v6!")
+	userSpace, err := client.API.KibanaSpaces.Get(id)
+	if err != nil {
+		return err
 	}
+
+	if userSpace == nil {
+		fmt.Printf("[WARN] User space %s not found - removing from state", id)
+		log.Warnf("User space %s not found - removing from state", id)
+		d.SetId("")
+		return nil
+	}
+
+	log.Debugf("Get user space %s successfully:\n%s", id, userSpace)
+
+	d.Set("name", id)
+	d.Set("description", userSpace.Description)
+	d.Set("disabled_features", userSpace.DisabledFeatures)
+	d.Set("initials", userSpace.Initials)
+	d.Set("color", userSpace.Color)
 
 	log.Infof("Read user space %s successfully", id)
 
@@ -143,26 +128,19 @@ func resourceKibanaUserSpaceUpdate(d *schema.ResourceData, meta interface{}) err
 	initials := d.Get("initials").(string)
 	color := d.Get("color").(string)
 
-	// Use the right client depend to Kibana version
-	switch meta.(type) {
-	// v7
-	case *kibana7.Client:
-		client := meta.(*kibana7.Client)
-		userSpace := &kbapi7.KibanaSpace{
-			ID:               id,
-			Name:             id,
-			Description:      description,
-			DisabledFeatures: disabledFeatures,
-			Initials:         initials,
-			Color:            color,
-		}
+	client := meta.(*kibana.Client)
+	userSpace := &kbapi.KibanaSpace{
+		ID:               id,
+		Name:             id,
+		Description:      description,
+		DisabledFeatures: disabledFeatures,
+		Initials:         initials,
+		Color:            color,
+	}
 
-		userSpace, err := client.API.KibanaSpaces.Update(userSpace)
-		if err != nil {
-			return err
-		}
-	default:
-		return errors.New("User space is only supported by the kibana library >= v6!")
+	userSpace, err := client.API.KibanaSpaces.Update(userSpace)
+	if err != nil {
+		return err
 	}
 
 	log.Infof("Updated user space %s successfully", id)
@@ -176,26 +154,18 @@ func resourceKibanaUserSpaceDelete(d *schema.ResourceData, meta interface{}) err
 	id := d.Id()
 	log.Debugf("User space id: %s", id)
 
-	// Use the right client depend to Elasticsearch version
-	switch meta.(type) {
-	// v7
-	case *kibana7.Client:
-		client := meta.(*kibana7.Client)
+	client := meta.(*kibana.Client)
 
-		err := client.API.KibanaSpaces.Delete(id)
-		if err != nil {
-			if err.(kbapi7.APIError).Code == 404 {
-				fmt.Printf("[WARN] User space %s not found - removing from state", id)
-				log.Warnf("User space %s not found - removing from state", id)
-				d.SetId("")
-				return nil
-			} else {
-				return err
-			}
+	err := client.API.KibanaSpaces.Delete(id)
+	if err != nil {
+		if err.(kbapi.APIError).Code == 404 {
+			fmt.Printf("[WARN] User space %s not found - removing from state", id)
+			log.Warnf("User space %s not found - removing from state", id)
+			d.SetId("")
+			return nil
+		} else {
+			return err
 		}
-
-	default:
-		return errors.New("User space is only supported by the kibana library >= v6!")
 	}
 
 	d.SetId("")

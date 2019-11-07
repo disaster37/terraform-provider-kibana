@@ -7,15 +7,14 @@ package kb
 import (
 	"fmt"
 
-	kibana7 "github.com/disaster37/go-kibana-rest"
-	kbapi7 "github.com/disaster37/go-kibana-rest/kbapi"
+	kibana "github.com/disaster37/go-kibana-rest/v7"
+	kbapi "github.com/disaster37/go-kibana-rest/v7/kbapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
-// Resource specification to handle user space in Kibana
+// Resource specification to handle role in Kibana
 func resourceKibanaRole() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceKibanaRoleCreate,
@@ -140,7 +139,7 @@ func resourceKibanaRole() *schema.Resource {
 	}
 }
 
-// Create new user space in Kibana
+// Create new role in Kibana
 func resourceKibanaRoleCreate(d *schema.ResourceData, meta interface{}) error {
 
 	name := d.Get("name").(string)
@@ -164,33 +163,26 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Debugf("Role id:  %s", id)
 
-	// Use the right client depend to Kibana version
-	switch meta.(type) {
-	// v7
-	case *kibana7.Client:
-		client := meta.(*kibana7.Client)
+	client := meta.(*kibana.Client)
 
-		role, err := client.API.KibanaRoleManagement.Get(id)
-		if err != nil {
-			return err
-		}
-
-		if role == nil {
-			fmt.Printf("[WARN] Role %s not found - removing from state", id)
-			log.Warnf("Role %s not found - removing from state", id)
-			d.SetId("")
-			return nil
-		}
-
-		log.Debugf("Get role %s successfully:\n%s", id, role)
-
-		d.Set("name", id)
-		d.Set("elasticsearch", []kbapi7.KibanaRoleElasticsearch{*role.Elasticsearch})
-		d.Set("kibana", role.Kibana)
-		d.Set("metadata", role.Metadata)
-	default:
-		return errors.New("Role is only supported by the kibana library >= v6!")
+	role, err := client.API.KibanaRoleManagement.Get(id)
+	if err != nil {
+		return err
 	}
+
+	if role == nil {
+		fmt.Printf("[WARN] Role %s not found - removing from state", id)
+		log.Warnf("Role %s not found - removing from state", id)
+		d.SetId("")
+		return nil
+	}
+
+	log.Debugf("Get role %s successfully:\n%s", id, role)
+
+	d.Set("name", id)
+	d.Set("elasticsearch", []kbapi.KibanaRoleElasticsearch{*role.Elasticsearch})
+	d.Set("kibana", role.Kibana)
+	d.Set("metadata", role.Metadata)
 
 	log.Infof("Read role %s successfully", id)
 
@@ -217,26 +209,18 @@ func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	id := d.Id()
 	log.Debugf("Role id: %s", id)
 
-	// Use the right client depend to Elasticsearch version
-	switch meta.(type) {
-	// v7
-	case *kibana7.Client:
-		client := meta.(*kibana7.Client)
+	client := meta.(*kibana.Client)
 
-		err := client.API.KibanaRoleManagement.Delete(id)
-		if err != nil {
-			if err.(kbapi7.APIError).Code == 404 {
-				fmt.Printf("[WARN] Role %s not found - removing from state", id)
-				log.Warnf("Role %s not found - removing from state", id)
-				d.SetId("")
-				return nil
-			} else {
-				return err
-			}
+	err := client.API.KibanaRoleManagement.Delete(id)
+	if err != nil {
+		if err.(kbapi.APIError).Code == 404 {
+			fmt.Printf("[WARN] Role %s not found - removing from state", id)
+			log.Warnf("Role %s not found - removing from state", id)
+			d.SetId("")
+			return nil
+		} else {
+			return err
 		}
-
-	default:
-		return errors.New("Role is only supported by the kibana library >= v6!")
 	}
 
 	d.SetId("")
@@ -246,43 +230,38 @@ func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 
 }
 
+// createRole permit to create or update role in Kibana
 func createRole(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 	metadataTemp := optionalInterfaceJson(d.Get("metadata").(string))
-	elasticsearch := buildRolesElasticsearch(d.Get("elasticsearch").(*schema.Set).List())
-	kibana := buildRolesKibana(d.Get("kibana").(*schema.Set).List())
+	roleElasticsearch := buildRolesElasticsearch(d.Get("elasticsearch").(*schema.Set).List())
+	roleKibana := buildRolesKibana(d.Get("kibana").(*schema.Set).List())
 
-	// Use the right client depend to Kibana version
-	switch meta.(type) {
-	// v7
-	case *kibana7.Client:
-		client := meta.(*kibana7.Client)
+	client := meta.(*kibana.Client)
 
-		var metadata map[string]interface{}
-		if metadataTemp != nil {
-			metadata = metadataTemp.(map[string]interface{})
-		} else {
-			metadata = nil
-		}
-		role := &kbapi7.KibanaRole{
-			Name:          name,
-			Elasticsearch: elasticsearch,
-			Kibana:        kibana,
-			Metadata:      metadata,
-		}
+	var metadata map[string]interface{}
+	if metadataTemp != nil {
+		metadata = metadataTemp.(map[string]interface{})
+	} else {
+		metadata = nil
+	}
+	role := &kbapi.KibanaRole{
+		Name:          name,
+		Elasticsearch: roleElasticsearch,
+		Kibana:        roleKibana,
+		Metadata:      metadata,
+	}
 
-		role, err := client.API.KibanaRoleManagement.CreateOrUpdate(role)
-		if err != nil {
-			return err
-		}
-	default:
-		return errors.New("Role is only supported by the kibana library >= v6!")
+	role, err := client.API.KibanaRoleManagement.CreateOrUpdate(role)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func buildRolesElasticsearch(raws []interface{}) *kbapi7.KibanaRoleElasticsearch {
+// buildRolesElasticsearch permit to construct kibanaRoleElasticsearch object
+func buildRolesElasticsearch(raws []interface{}) *kbapi.KibanaRoleElasticsearch {
 	if len(raws) == 0 {
 		return nil
 	}
@@ -290,7 +269,7 @@ func buildRolesElasticsearch(raws []interface{}) *kbapi7.KibanaRoleElasticsearch
 	// We check only the first, we case use multiple KibanaRoleElasticsearch
 	raw := raws[0].(map[string]interface{})
 
-	kibanaRoleElasticsearch := &kbapi7.KibanaRoleElasticsearch{}
+	kibanaRoleElasticsearch := &kbapi.KibanaRoleElasticsearch{}
 
 	if _, ok := raw["run_as"]; ok {
 		kibanaRoleElasticsearch.RunAs = convertArrayInterfaceToArrayString(raw["run_as"].(*schema.Set).List())
@@ -306,8 +285,9 @@ func buildRolesElasticsearch(raws []interface{}) *kbapi7.KibanaRoleElasticsearch
 
 }
 
-func buildKibanaRoleElasticsearchIndice(raws []interface{}) []kbapi7.KibanaRoleElasticsearchIndice {
-	kibanaRoleElasticsearchIndices := make([]kbapi7.KibanaRoleElasticsearchIndice, len(raws))
+// buildKibanaRoleElasticsearchIndice permit to build list of KibanaRoleElasticsearchIndice
+func buildKibanaRoleElasticsearchIndice(raws []interface{}) []kbapi.KibanaRoleElasticsearchIndice {
+	kibanaRoleElasticsearchIndices := make([]kbapi.KibanaRoleElasticsearchIndice, len(raws))
 	for i, raw := range raws {
 		m := raw.(map[string]interface{})
 		fieldSecurityTemp := optionalInterfaceJson(m["field_security"].(string))
@@ -317,7 +297,7 @@ func buildKibanaRoleElasticsearchIndice(raws []interface{}) []kbapi7.KibanaRoleE
 		} else {
 			fieldSecurity = nil
 		}
-		kibanaRoleElasticsearchIndice := kbapi7.KibanaRoleElasticsearchIndice{
+		kibanaRoleElasticsearchIndice := kbapi.KibanaRoleElasticsearchIndice{
 			Names:         convertArrayInterfaceToArrayString(m["names"].(*schema.Set).List()),
 			Privileges:    convertArrayInterfaceToArrayString(m["privileges"].(*schema.Set).List()),
 			Query:         optionalInterfaceJson(m["query"].(string)),
@@ -330,13 +310,14 @@ func buildKibanaRoleElasticsearchIndice(raws []interface{}) []kbapi7.KibanaRoleE
 	return kibanaRoleElasticsearchIndices
 }
 
-func buildRolesKibana(raws []interface{}) []kbapi7.KibanaRoleKibana {
-	kibanaRoleKibanas := make([]kbapi7.KibanaRoleKibana, len(raws))
+// buildRolesKibana permit to  build list of KibanaRoleKibana object
+func buildRolesKibana(raws []interface{}) []kbapi.KibanaRoleKibana {
+	kibanaRoleKibanas := make([]kbapi.KibanaRoleKibana, len(raws))
 
 	for i, raw := range raws {
 		m := raw.(map[string]interface{})
 
-		kibanaRoleKibana := kbapi7.KibanaRoleKibana{
+		kibanaRoleKibana := kbapi.KibanaRoleKibana{
 			Base:    convertArrayInterfaceToArrayString(m["base"].(*schema.Set).List()),
 			Feature: buildKibanaRoleKibanaFeatures(m["features"].(*schema.Set).List()),
 			Spaces:  convertArrayInterfaceToArrayString(m["spaces"].(*schema.Set).List()),
@@ -348,6 +329,7 @@ func buildRolesKibana(raws []interface{}) []kbapi7.KibanaRoleKibana {
 	return kibanaRoleKibanas
 }
 
+// buildKibanaRoleKibanaFeatures permit to build list of feature map
 func buildKibanaRoleKibanaFeatures(raws []interface{}) map[string][]string {
 	features := map[string][]string{}
 
