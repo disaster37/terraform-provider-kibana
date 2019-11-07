@@ -1,4 +1,4 @@
-module github.com/disaster37/terraform-provider-kibana
+module github.com/disaster37/terraform-provider-kibana/v7
 
 go 1.12
 
