@@ -33,7 +33,6 @@ jobs:
       - checkout
       - run: until $(curl --output /dev/null --silent --head --fail -u elastic:changeme http://kb:5601); do sleep 5; done
       - run: curl -XPOST -u elastic:changeme http://es:9200/_license/start_trial?acknowledge=true
-      - run: curl -XPOST -u elastic:changeme http://es:9200/_license/start_trial?acknowledge=true
       - run: sleep 10
       - run: make testacc
       - codecov/upload:
