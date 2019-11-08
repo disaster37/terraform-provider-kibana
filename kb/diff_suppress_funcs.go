@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-func suppressEquivalentJson(k, old, new string, d *schema.ResourceData) bool {
+// suppressEquivalentJSON permit to compare json string
+func suppressEquivalentJSON(k, old, new string, d *schema.ResourceData) bool {
 	var oldObj, newObj interface{}
 	if err := json.Unmarshal([]byte(old), &oldObj); err != nil {
 		return false

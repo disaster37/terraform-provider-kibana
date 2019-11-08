@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/disaster37/terraform-provider-kibana/kb"
+	"github.com/disaster37/terraform-provider-kibana/v7/kb"
 
 	"github.com/hashicorp/terraform-plugin-sdk/plugin"
 )

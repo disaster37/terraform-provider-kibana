@@ -2,8 +2,10 @@ package kb
 
 import (
 	"net/url"
+	"time"
 
-	kibana7 "github.com/disaster37/go-kibana-rest"
+	kibana "github.com/disaster37/go-kibana-rest/v7"
+	"github.com/disaster37/go-kibana-rest/v7/kbapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -11,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Provider define kibana provider
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -46,12 +49,25 @@ func Provider() terraform.ResourceProvider {
 				Default:     false,
 				Description: "Disable SSL verification of API calls",
 			},
+			"retry": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     6,
+				Description: "Nummber time it retry connexion before failed",
+			},
+			"wait_before_retry": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     10,
+				Description: "Wait time in second before retry connexion",
+			},
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"kibana_user_space": resourceKibanaUserSpace(),
-			"kibana_role":       resourceKibanaRole(),
-			"kibana_object":     resourceKibanaObject(),
+			"kibana_user_space":        resourceKibanaUserSpace(),
+			"kibana_role":              resourceKibanaRole(),
+			"kibana_object":            resourceKibanaObject(),
+			"kibana_logstash_pipeline": resourceKibanaLogstashPipeline(),
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -69,13 +85,16 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	cacertFiles := convertArrayInterfaceToArrayString(d.Get("cacert_files").(*schema.Set).List())
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
+	retry := d.Get("retry").(int)
+	waitBeforeRetry := d.Get("wait_before_retry").(int)
+
 	// Checks is valid URL
 	if _, err := url.Parse(URL); err != nil {
 		return nil, err
 	}
 
 	// Intialise connexion
-	cfg := kibana7.Config{
+	cfg := kibana.Config{
 		Address: URL,
 		CAs:     cacertFiles,
 	}
@@ -87,15 +106,26 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		cfg.DisableVerifySSL = true
 	}
 
-	client, err := kibana7.NewClient(cfg)
+	client, err := kibana.NewClient(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	// Test connexion and check elastic version to use the right Version
-	kibanaStatus, err := client.API.KibanaStatus.Get()
-	if err != nil {
-		return nil, err
+	// Test connexion and check kibana version
+	nbFailed := 0
+	isOnline := false
+	var kibanaStatus kbapi.KibanaStatus
+	for isOnline == false {
+		kibanaStatus, err = client.API.KibanaStatus.Get()
+		if err == nil {
+			isOnline = true
+		} else {
+			if nbFailed == retry {
+				return nil, err
+			}
+			nbFailed++
+			time.Sleep(time.Duration(waitBeforeRetry) * time.Second)
+		}
 	}
 
 	if kibanaStatus == nil {
@@ -109,7 +139,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		log.Printf("[INFO] Using Kibana 7")
 		relevantClient = client
 	} else {
-		return nil, errors.New("Kibana is older than 7.0.0!")
+		return nil, errors.New("Kibana is older than 7.0.0")
 	}
 
 	return relevantClient, nil
