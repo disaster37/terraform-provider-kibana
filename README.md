@@ -198,3 +198,29 @@ resource "kibana_logstash_pipeline" "test" {
   - **username**: The username that create the logstash pipeline
 
 ---
+
+## Development
+
+### Requirements
+
+* [Golang](https://golang.org/dl/) >= 1.11
+* [Terrafrom](https://www.terraform.io/) >= 0.12
+
+
+```
+go build -o /path/to/binary/terraform-provider-kibana
+```
+
+## Licence
+
+See LICENSE.
+
+## Contributing
+
+1. Fork it ( https://github.com/disaster37/terraform-provider-kibana/fork )
+2. Go to the right branch (7.x for Kibana 7) (`git checkout 7.x`)
+3. Create your feature branch (`git checkout -b my-new-feature`)
+4. Add feature, add acceptance test and tets your code (`KIBANA_URL=http://127.0.0.1:5601 KIBANA_USERNAME=elastic KIBANA_PASSWORD=changeme make testacc`)
+5. Commit your changes (`git commit -am 'Add some feature'`)
+6. Push to the branch (`git push origin my-new-feature`)
+7. Create a new Pull Request
