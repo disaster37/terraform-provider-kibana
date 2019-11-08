@@ -170,4 +170,31 @@ resource "kibana_object" "test" {
 
 ### Logstash pipeline management
 
-@Todo
+This resource permit to manage logstash pipeline in Kibana.
+You can see the API documentation: https://www.elastic.co/guide/en/kibana/master/logstash-configuration-management-api.html
+
+***Supported Kibana version:***
+  - v7
+
+***Sample:***
+```tf
+resource "kibana_logstash_pipeline" "test" {
+  name 				= "terraform-test"
+  description 		= "test"
+  pipeline			= "input { stdin {} } output { stdout {} }"
+  settings = {
+	  "queue.type" = "persisted"
+  }
+}
+```
+
+***The following arguments are supported:***
+  - **name**: (required) The unique name of logstash pipeline
+  - **description**: (optional) The logstash pipeline description
+  - **pipeline**: (required) The pipeline specification as JSON string.
+  - **settings**: (optional) The extra logstash pipeline settings, as map of string.
+
+***Computed field***
+  - **username**: The username that create the logstash pipeline
+
+---

@@ -64,9 +64,10 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"kibana_user_space": resourceKibanaUserSpace(),
-			"kibana_role":       resourceKibanaRole(),
-			"kibana_object":     resourceKibanaObject(),
+			"kibana_user_space":        resourceKibanaUserSpace(),
+			"kibana_role":              resourceKibanaRole(),
+			"kibana_object":            resourceKibanaObject(),
+			"kibana_logstash_pipeline": resourceKibanaLogstashPipeline(),
 		},
 
 		ConfigureFunc: providerConfigure,
