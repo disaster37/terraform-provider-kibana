@@ -61,6 +61,12 @@ func Provider() terraform.ResourceProvider {
 				Default:     10,
 				Description: "Wait time in second before retry connexion",
 			},
+			"debug": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Enable debug log level in provider",
+			},
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -87,6 +93,11 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	password := d.Get("password").(string)
 	retry := d.Get("retry").(int)
 	waitBeforeRetry := d.Get("wait_before_retry").(int)
+	debug := d.Get("debug").(bool)
+
+	if debug {
+		log.SetLevel(log.DebugLevel)
+	}
 
 	// Checks is valid URL
 	if _, err := url.Parse(URL); err != nil {

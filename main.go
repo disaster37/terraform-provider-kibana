@@ -10,4 +10,5 @@ func main() {
 	plugin.Serve(&plugin.ServeOpts{
 		ProviderFunc: kb.Provider,
 	})
+
 }

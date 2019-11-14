@@ -37,7 +37,7 @@ func resourceKibanaObject() *schema.Resource {
 			"data": {
 				Type:             schema.TypeString,
 				Required:         true,
-				DiffSuppressFunc: suppressEquivalentJSON,
+				DiffSuppressFunc: suppressEquivalentNDJSON,
 			},
 			"export_types": {
 				Type:     schema.TypeSet,
@@ -115,10 +115,10 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	}
 
-	log.Debugf("Export object %s successfully:\n%+v", id, data)
+	log.Debugf("Export object %s successfully:\n%+v", id, string(data))
 
 	d.Set("name", id)
-	d.Set("data", data)
+	d.Set("data", string(data))
 	d.Set("space", space)
 	d.Set("export_types", exportTypes)
 	d.Set("export_objects", exportObjects)
