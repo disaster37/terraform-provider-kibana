@@ -80,9 +80,6 @@ resource "kibana_object" "test" {
   name 				= "terraform-test"
   data				= "${file("../fixtures/index-pattern.json")}"
   deep_reference	= "true"
-  export_objects {
-	  id = "logstash-log-*"
-	  type = "index-pattern"
-  }
+  export_types    	= ["index-pattern"]
 }
 `
