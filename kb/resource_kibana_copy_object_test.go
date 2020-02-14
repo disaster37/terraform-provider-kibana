@@ -41,9 +41,9 @@ func testCheckKibanaCopyObjectExists(name string) resource.TestCheckFunc {
 		}
 
 		// Use static value that match the current test
-		objectID := "logstash-log-*"
+		objectID := "test"
 		objectType := "index-pattern"
-		targetSpace := "test"
+		targetSpace := "terraform-test2"
 
 		meta := testAccProvider.Meta()
 
@@ -75,22 +75,24 @@ func testCheckKibanaCopyObjectDestroy(s *terraform.State) error {
 var testKibanaCopyObject = `
 resource kibana_object "test" {
   name 				= "terraform-test"
-  data				= "${file("../fixtures/index-pattern.json")}"
+  data				= "${file("../fixtures/test.ndjson")}"
   deep_reference	= "true"
   export_types    	= ["index-pattern"]
 }
 
-resource kibana_space "test" {
-  name 				= "terraform-test"
+resource kibana_user_space "test" {
+  name 				= "terraform-test2"
 }
 
 resource kibana_copy_object "test" {
-  name 				= "terraform-test"
+  name 				= "terraform-test2"
   source_space		= "default"
-  target_spaces		= ["${kibana_space.test.id}"]
+  target_spaces		= ["terraform-test"]
   object {
-	  id   = "logstash-system-*"
-	  type = "${kibana_object.test.export_types[0]}"
+	  id   = "test"
+	  type = "index-pattern"
   }
+
+  depends_on = [kibana_object.test, kibana_user_space.test]
 }
 `
