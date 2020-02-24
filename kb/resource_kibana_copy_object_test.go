@@ -65,13 +65,11 @@ func testCheckKibanaCopyObjectExists(name string) resource.TestCheckFunc {
 
 func testCheckKibanaCopyObjectDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
-		log.Infof("RS TYPE: %s", rs.Type)
-		if (rs.Type != "kibana_copy_object") && (rs.Type != "kibana_object") {
+		if rs.Type != "kibana_copy_object" {
 			continue
 		}
 
-		log.Infof("We never delete kibana object")
-		return nil
+		log.Debugf("We never delete kibana object")
 
 	}
 

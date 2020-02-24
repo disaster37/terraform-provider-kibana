@@ -84,7 +84,7 @@ func testCheckKibanaRoleDestroy(s *terraform.State) error {
 }
 
 var testKibanaRole = `
-resource "kibana_role" "test" {
+resource kibana_role "test" {
   name 				= "terraform-test"
   elasticsearch {
 	indices {
@@ -93,7 +93,7 @@ resource "kibana_role" "test" {
 	}
 	indices {
 		names 		= ["logstash-*"]
-		privileges 	= ["read2"]
+		privileges 	= ["read"]
 	}
 	cluster = ["all"]
   }

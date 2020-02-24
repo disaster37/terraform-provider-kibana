@@ -1,0 +1,163 @@
+==> Fixing source code with gofmt...
+gofmt -s -w ./kb
+==> Checking that code complies with gofmt requirements...
+KIBANA_URL=http://127.0.0.1:5601 KIBANA_USERNAME=elastic KIBANA_PASSWORD=changeme TF_ACC=1 go test ./... -v -count 1 -parallel 1 -race -coverprofile=coverage.txt -covermode=atomic  -timeout 120m
+?   	github.com/disaster37/terraform-provider-kibana/v7	[no test files]
+=== RUN   TestProvider
+--- PASS: TestProvider (0.00s)
+=== RUN   TestProvider_impl
+--- PASS: TestProvider_impl (0.00s)
+=== RUN   TestAccKibanaCopyObject
+2020/02/24 10:33:30.263022 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:30Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:30.361320 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:30Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:30.405891 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+2020/02/24 10:33:30.406976 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:31Z" level=info msg="Imported objects terraform-test successfully"
+2020/02/24 10:33:31.023976 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:31Z" level=info msg="Created user space terraform-test2 successfully"
+2020/02/24 10:33:31.024783 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:31Z" level=info msg="Read user space terraform-test2 successfully"
+time="2020-02-24T10:33:31Z" level=info msg="Export object terraform-test successfully"
+2020/02/24 10:33:31.148847 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:32Z" level=info msg="Copy objects terraform-test2 successfully"
+time="2020-02-24T10:33:32Z" level=info msg="Read resource terraform-test2 successfully"
+2020/02/24 10:33:32.101613 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+2020/02/24 10:33:33.210826 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:33Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:33.736456 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:33Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:33.778898 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:33Z" level=info msg="Read user space terraform-test2 successfully"
+2020/02/24 10:33:33.954612 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:33Z" level=info msg="Export object terraform-test successfully"
+time="2020-02-24T10:33:34Z" level=info msg="Read resource terraform-test2 successfully"
+2020/02/24 10:33:34.114470 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:34Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:34.644278 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:34Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:34.692373 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:34Z" level=info msg="Read user space terraform-test2 successfully"
+2020/02/24 10:33:34.877431 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:34Z" level=info msg="Export object terraform-test successfully"
+time="2020-02-24T10:33:34Z" level=info msg="Read resource terraform-test2 successfully"
+2020/02/24 10:33:35.354425 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:35Z" level=info msg="[INFO] Using Kibana 7"
+time="2020-02-24T10:33:35Z" level=info msg="Delete object in not supported"
+[INFO] Delete object in not supported - just removing from state2020/02/24 10:33:35.405716 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:35Z" level=info msg="Delete object in not supported"
+[INFO] Delete object in not supported - just removing from statetime="2020-02-24T10:33:36Z" level=info msg="Deleted user space terraform-test2 successfully"
+time="2020-02-24T10:33:36Z" level=info msg="RS TYPE: kibana_user_space"
+time="2020-02-24T10:33:36Z" level=info msg="RS TYPE: kibana_copy_object"
+time="2020-02-24T10:33:36Z" level=info msg="We never delete kibana object"
+--- PASS: TestAccKibanaCopyObject (5.97s)
+=== RUN   TestAccKibanaLogstashPipeline
+2020/02/24 10:33:36.212215 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:36Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:36.301430 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:36Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:36.470630 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+--- FAIL: TestAccKibanaLogstashPipeline (0.37s)
+    testing.go:569: Step 0 error: errors during apply:
+        
+        Error: 403 Forbidden
+        
+          on /tmp/tf-test694265864/main.tf line 2:
+          (source code not available)
+        
+        
+=== RUN   TestAccKibanaObject
+2020/02/24 10:33:36.580363 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:36Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:36.702208 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:36Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:36.812503 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:37Z" level=info msg="Imported objects terraform-test successfully"
+2020/02/24 10:33:37.125468 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:37Z" level=info msg="Export object terraform-test successfully"
+2020/02/24 10:33:37.289757 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+2020/02/24 10:33:37.320069 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:37Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:37.772354 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:37Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:37.999556 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:38Z" level=info msg="Export object terraform-test successfully"
+2020/02/24 10:33:38.130905 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:38Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:38.725966 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:38Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:38.956309 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:38Z" level=info msg="Export object terraform-test successfully"
+2020/02/24 10:33:39.412125 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:39Z" level=info msg="[INFO] Using Kibana 7"
+time="2020-02-24T10:33:39Z" level=info msg="Delete object in not supported"
+[INFO] Delete object in not supported - just removing from state--- PASS: TestAccKibanaObject (3.14s)
+=== RUN   TestAccKibanaRole
+2020/02/24 10:33:39.767606 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:39Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:39.848752 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:39Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:39.927839 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+2020/02/24 10:33:40.047263 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="Created role terraform-test successfully"
+2020/02/24 10:33:40.091672 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="Read role terraform-test successfully"
+2020/02/24 10:33:40.118237 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+2020/02/24 10:33:40.155711 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:40.228498 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:40.274614 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="Read role terraform-test successfully"
+2020/02/24 10:33:40.309099 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:40.388691 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:40.431597 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="Read role terraform-test successfully"
+2020/02/24 10:33:40.499890 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:40.591806 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="Read role terraform-test successfully"
+2020/02/24 10:33:40.649483 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:40.702981 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="Deleted role terraform-test successfully"
+2020/02/24 10:33:40.782743 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+--- PASS: TestAccKibanaRole (1.15s)
+=== RUN   TestAccKibanaUserSpace
+2020/02/24 10:33:40.898633 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:40.964134 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:40Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:41.024299 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="Created user space terraform-test successfully"
+2020/02/24 10:33:41.134030 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="Read user space terraform-test successfully"
+2020/02/24 10:33:41.168777 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+2020/02/24 10:33:41.210270 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:41.274319 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:41.322854 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="Read user space terraform-test successfully"
+2020/02/24 10:33:41.355796 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:41.444727 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:41.488333 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="Read user space terraform-test successfully"
+2020/02/24 10:33:41.668276 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:41.723250 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="Read user space terraform-test successfully"
+2020/02/24 10:33:41.873986 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:41Z" level=info msg="[INFO] Using Kibana 7"
+2020/02/24 10:33:41.912292 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+time="2020-02-24T10:33:42Z" level=info msg="Deleted user space terraform-test successfully"
+2020/02/24 10:33:42.154361 WARN RESTY Using Basic Auth in HTTP mode is not secure, use HTTPS
+--- PASS: TestAccKibanaUserSpace (1.40s)
+FAIL
+coverage: 64.4% of statements
+FAIL	github.com/disaster37/terraform-provider-kibana/v7/kb	12.107s

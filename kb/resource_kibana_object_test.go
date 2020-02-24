@@ -25,6 +25,7 @@ func TestAccKibanaObject(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testCheckKibanaObjectExists("kibana_object.test"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
