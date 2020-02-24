@@ -11,19 +11,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func TestAccKibanaObject(t *testing.T) {
+func TestAccKibanaCopyObject(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
 		Providers:    testAccProviders,
-		CheckDestroy: testCheckKibanaObjectDestroy,
+		CheckDestroy: testCheckKibanaCopyObjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testKibanaObject,
+				Config: testKibanaCopyObject,
 				Check: resource.ComposeTestCheckFunc(
-					testCheckKibanaObjectExists("kibana_object.test"),
+					testCheckKibanaCopyObjectExists("kibana_copy_object.test"),
 				),
 				ExpectNonEmptyPlan: true,
 			},
@@ -31,7 +31,7 @@ func TestAccKibanaObject(t *testing.T) {
 	})
 }
 
-func testCheckKibanaObjectExists(name string) resource.TestCheckFunc {
+func testCheckKibanaCopyObjectExists(name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[name]
 		if !ok {
@@ -42,21 +42,20 @@ func testCheckKibanaObjectExists(name string) resource.TestCheckFunc {
 		}
 
 		// Use static value that match the current test
-		deepReference := true
-		exportObject := map[string]string{}
-		exportObject["id"] = "logstash-log-*"
-		exportObject["type"] = "index-pattern"
-		exportObjects := []map[string]string{exportObject}
-		space := "default"
+		objectID := "test"
+		objectType := "index-pattern"
+		targetSpace := "terraform-test2"
 
 		meta := testAccProvider.Meta()
 
 		client := meta.(*kibana.Client)
-		data, err := client.API.KibanaSavedObject.Export(nil, exportObjects, deepReference, space)
+		data, err := client.API.KibanaSavedObject.Get(objectType, objectID, targetSpace)
 		if err != nil {
 			return err
 		}
+
 		if len(data) == 0 {
+			panic(fmt.Sprintf("%+v", data))
 			return errors.Errorf("Object %s not found", rs.Primary.ID)
 		}
 
@@ -64,23 +63,41 @@ func testCheckKibanaObjectExists(name string) resource.TestCheckFunc {
 	}
 }
 
-func testCheckKibanaObjectDestroy(s *terraform.State) error {
+func testCheckKibanaCopyObjectDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "kibana_object" {
+		if rs.Type != "kibana_copy_object" {
 			continue
 		}
 
 		log.Debugf("We never delete kibana object")
+
 	}
 
 	return nil
+
 }
 
-var testKibanaObject = `
-resource "kibana_object" "test" {
+var testKibanaCopyObject = `
+resource kibana_object "test" {
   name 				= "terraform-test"
-  data				= "${file("../fixtures/index-pattern.json")}"
+  data				= "${file("../fixtures/test.ndjson")}"
   deep_reference	= "true"
   export_types    	= ["index-pattern"]
+}
+
+resource kibana_user_space "test" {
+  name 				= "terraform-test2"
+}
+
+resource kibana_copy_object "test" {
+  name 				= "terraform-test2"
+  source_space		= "default"
+  target_spaces		= ["${kibana_user_space.test.name}"]
+  object {
+	  id   = "test"
+	  type = "index-pattern"
+  }
+
+  depends_on = [kibana_object.test, kibana_user_space.test]
 }
 `

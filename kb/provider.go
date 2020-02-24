@@ -74,6 +74,7 @@ func Provider() terraform.ResourceProvider {
 			"kibana_role":              resourceKibanaRole(),
 			"kibana_object":            resourceKibanaObject(),
 			"kibana_logstash_pipeline": resourceKibanaLogstashPipeline(),
+			"kibana_copy_object":       resourceKibanaCopyObject(),
 		},
 
 		ConfigureFunc: providerConfigure,

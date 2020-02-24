@@ -3,7 +3,7 @@ module github.com/disaster37/terraform-provider-kibana/v7
 go 1.12
 
 require (
-	github.com/disaster37/go-kibana-rest/v7 v7.4.2-2
+	github.com/disaster37/go-kibana-rest/v7 v7.5.1-1
 	github.com/hashicorp/terraform-plugin-sdk v1.1.1
 	github.com/mitchellh/gox v1.0.1
 	github.com/pkg/errors v0.8.1
