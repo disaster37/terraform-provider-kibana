@@ -25,6 +25,7 @@ func TestAccKibanaCopyObject(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testCheckKibanaCopyObjectExists("kibana_copy_object.test"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -52,7 +53,9 @@ func testCheckKibanaCopyObjectExists(name string) resource.TestCheckFunc {
 		if err != nil {
 			return err
 		}
+
 		if len(data) == 0 {
+			panic(fmt.Sprintf("%+v", data))
 			return errors.Errorf("Object %s not found", rs.Primary.ID)
 		}
 
@@ -62,14 +65,18 @@ func testCheckKibanaCopyObjectExists(name string) resource.TestCheckFunc {
 
 func testCheckKibanaCopyObjectDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "kibana_copy_object" {
+		log.Infof("RS TYPE: %s", rs.Type)
+		if (rs.Type != "kibana_copy_object") && (rs.Type != "kibana_object") {
 			continue
 		}
 
-		log.Debugf("We never delete kibana object")
+		log.Infof("We never delete kibana object")
+		return nil
+
 	}
 
 	return nil
+
 }
 
 var testKibanaCopyObject = `
@@ -87,7 +94,7 @@ resource kibana_user_space "test" {
 resource kibana_copy_object "test" {
   name 				= "terraform-test2"
   source_space		= "default"
-  target_spaces		= ["terraform-test"]
+  target_spaces		= ["${kibana_user_space.test.name}"]
   object {
 	  id   = "test"
 	  type = "index-pattern"
