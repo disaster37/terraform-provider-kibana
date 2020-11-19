@@ -78,12 +78,13 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - release:
-          context: Github
-          requires:
-            - build
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore: /.*/
+      
+      #- release:
+      #    context: Github
+      #    requires:
+      #      - build
+      #    filters:
+      #      tags:
+      #        only: /.*/
+      #      branches:
+      #        ignore: /.*/
