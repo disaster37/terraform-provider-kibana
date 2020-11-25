@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/disaster37/terraform-provider-kibana/v7/kb"
 
 	"github.com/hashicorp/terraform-plugin-sdk/plugin"
@@ -14,7 +16,7 @@ func main() {
 	formatter.ForceFormatting = true
 	log.SetFormatter(formatter)
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.InfoLevel)
+	log.SetLevel(log.DebugLevel)
 
 	plugin.Serve(&plugin.ServeOpts{
 		ProviderFunc: kb.Provider,
