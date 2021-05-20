@@ -92,6 +92,8 @@ resource kibana_copy_object "test" {
   name 				= "terraform-test2"
   source_space		= "default"
   target_spaces		= ["${kibana_user_space.test.name}"]
+  overwrite			= true
+  create_new_copies = false
   object {
 	  id   = "test"
 	  type = "index-pattern"
