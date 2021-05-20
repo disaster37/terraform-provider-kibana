@@ -7,13 +7,13 @@ orbs:
 jobs:
   test:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.15
         environment:
           - GO111MODULE: "on"
           - KIBANA_URL: "http://kb:5601"
           - KIBANA_USERNAME: "elastic"
           - KIBANA_PASSWORD: "changeme"
-      - image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+      - image: docker.elastic.co/elasticsearch/elasticsearch:7.12.1
         name: es
         environment:
           - cluster.name: "test"
@@ -22,7 +22,7 @@ jobs:
           - xpack.security.enabled: "true"
           - ES_JAVA_OPTS: "-Xms512m -Xmx512m"
           - path.repo: "/tmp"
-      - image: docker.elastic.co/kibana/kibana:7.5.1
+      - image: docker.elastic.co/kibana/kibana:7.12.1
         name: kb
         environment:
           ELASTICSEARCH_HOSTS: http://es:9200
@@ -40,7 +40,7 @@ jobs:
           flags: unittest
   build:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.15
         environment:
           - GO111MODULE: "on"
     working_directory: /go/src/github.com/disaster37/terraform-provider-kibana
@@ -49,7 +49,7 @@ jobs:
       - run: make build
   release:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.15
         environment:
           - GO111MODULE: "on"
           - GITHUB_TOKEN: $GITHUB_TOKEN
