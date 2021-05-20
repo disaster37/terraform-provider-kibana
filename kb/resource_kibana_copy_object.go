@@ -67,7 +67,7 @@ func resourceKibanaCopyObject() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"createNewCopies": {
+			"create_new_copies": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
@@ -106,7 +106,7 @@ func resourceKibanaCopyObjectRead(d *schema.ResourceData, meta interface{}) erro
 	objects := buildCopyObjects(d.Get("object").(*schema.Set).List())
 	includeReference := d.Get("include_reference").(bool)
 	overwrite := d.Get("overwrite").(bool)
-	createNewCopies := d.Get("createNewCopies").(bool)
+	createNewCopies := d.Get("create_new_copies").(bool)
 	forceUpdate := d.Get("force_update").(bool)
 
 	log.Debugf("Resource id:  %s", id)
@@ -129,7 +129,7 @@ func resourceKibanaCopyObjectRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("object", objects)
 	d.Set("include_reference", includeReference)
 	d.Set("overwrite", overwrite)
-	d.Set("createNewCopies", createNewCopies)
+	d.Set("create_new_copies", createNewCopies)
 	d.Set("force_update", false)
 
 	log.Infof("Read resource %s successfully", id)
@@ -187,7 +187,7 @@ func copyObject(d *schema.ResourceData, meta interface{}) error {
 	objects := buildCopyObjects(d.Get("object").(*schema.Set).List())
 	includeReference := d.Get("include_reference").(bool)
 	overwrite := d.Get("overwrite").(bool)
-	createNewCopies := d.Get("createNewCopies").(bool)
+	createNewCopies := d.Get("create_new_copies").(bool)
 
 	log.Debugf("Source space: %s", sourceSpace)
 	log.Debugf("Target spaces: %+v", targetSpaces)
