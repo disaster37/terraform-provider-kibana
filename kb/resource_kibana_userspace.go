@@ -6,13 +6,12 @@
 package kb
 
 import (
-	"fmt"
+	"log"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	kbapi "github.com/disaster37/go-kibana-rest/v7/kbapi"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	log "github.com/sirupsen/logrus"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Resource specification to handle user space in Kibana
@@ -82,7 +81,7 @@ func resourceKibanaUserSpaceCreate(d *schema.ResourceData, meta interface{}) err
 
 	d.SetId(name)
 
-	log.Infof("Created user space %s successfully", name)
+	log.Printf("[INFO] Created user space %s successfully", name)
 
 	return resourceKibanaUserSpaceRead(d, meta)
 }
@@ -92,7 +91,7 @@ func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error
 
 	id := d.Id()
 
-	log.Debugf("User space id:  %s", id)
+	log.Printf("[DEBUG] User space id:  %s", id)
 
 	client := meta.(*kibana.Client)
 
@@ -102,13 +101,12 @@ func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if userSpace == nil {
-		fmt.Printf("[WARN] User space %s not found - removing from state", id)
-		log.Warnf("User space %s not found - removing from state", id)
+		log.Printf("[WARN] User space %s not found - removing from state", id)
 		d.SetId("")
 		return nil
 	}
 
-	log.Debugf("Get user space %s successfully:\n%s", id, userSpace)
+	log.Printf("[DEBUG] Get user space %s successfully:\n%s", id, userSpace)
 
 	d.Set("name", id)
 	d.Set("description", userSpace.Description)
@@ -116,7 +114,7 @@ func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("initials", userSpace.Initials)
 	d.Set("color", userSpace.Color)
 
-	log.Infof("Read user space %s successfully", id)
+	log.Printf("[INFO] Read user space %s successfully", id)
 
 	return nil
 }
@@ -144,7 +142,7 @@ func resourceKibanaUserSpaceUpdate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	log.Infof("Updated user space %s successfully", id)
+	log.Printf("[INFO] Updated user space %s successfully", id)
 
 	return resourceKibanaUserSpaceRead(d, meta)
 }
@@ -153,15 +151,14 @@ func resourceKibanaUserSpaceUpdate(d *schema.ResourceData, meta interface{}) err
 func resourceKibanaUserSpaceDelete(d *schema.ResourceData, meta interface{}) error {
 
 	id := d.Id()
-	log.Debugf("User space id: %s", id)
+	log.Printf("[DEBUG] User space id: %s", id)
 
 	client := meta.(*kibana.Client)
 
 	err := client.API.KibanaSpaces.Delete(id)
 	if err != nil {
 		if err.(kbapi.APIError).Code == 404 {
-			fmt.Printf("[WARN] User space %s not found - removing from state", id)
-			log.Warnf("User space %s not found - removing from state", id)
+			log.Printf("[WARN] User space %s not found - removing from state", id)
 			d.SetId("")
 			return nil
 		}
@@ -171,7 +168,7 @@ func resourceKibanaUserSpaceDelete(d *schema.ResourceData, meta interface{}) err
 
 	d.SetId("")
 
-	log.Infof("Deleted user space %s successfully", id)
+	log.Printf("[INFO] Deleted user space %s successfully", id)
 	return nil
 
 }

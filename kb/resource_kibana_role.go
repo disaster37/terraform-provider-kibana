@@ -6,13 +6,12 @@
 package kb
 
 import (
-	"fmt"
+	"log"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	kbapi "github.com/disaster37/go-kibana-rest/v7/kbapi"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	log "github.com/sirupsen/logrus"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Resource specification to handle role in Kibana
@@ -152,7 +151,7 @@ func resourceKibanaRoleCreate(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(name)
 
-	log.Infof("Created role %s successfully", name)
+	log.Printf("[INFO] Created role %s successfully", name)
 
 	return resourceKibanaRoleRead(d, meta)
 }
@@ -162,7 +161,7 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	id := d.Id()
 
-	log.Debugf("Role id:  %s", id)
+	log.Printf("[DEBUG] Role id:  %s", id)
 
 	client := meta.(*kibana.Client)
 
@@ -172,20 +171,19 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if role == nil {
-		fmt.Printf("[WARN] Role %s not found - removing from state", id)
-		log.Warnf("Role %s not found - removing from state", id)
+		log.Printf("[WARN] Role %s not found - removing from state", id)
 		d.SetId("")
 		return nil
 	}
 
-	log.Debugf("Get role %s successfully:\n%s", id, role)
+	log.Printf("[DEBUG] Get role %s successfully:\n%s", id, role)
 
 	d.Set("name", id)
 	d.Set("elasticsearch", []kbapi.KibanaRoleElasticsearch{*role.Elasticsearch})
 	d.Set("kibana", role.Kibana)
 	d.Set("metadata", role.Metadata)
 
-	log.Infof("Read role %s successfully", id)
+	log.Printf("[INFO] Read role %s successfully", id)
 
 	return nil
 }
@@ -199,7 +197,7 @@ func resourceKibanaRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	log.Infof("Updated role %s successfully", id)
+	log.Printf("[INFO] Updated role %s successfully", id)
 
 	return resourceKibanaRoleRead(d, meta)
 }
@@ -208,15 +206,14 @@ func resourceKibanaRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 
 	id := d.Id()
-	log.Debugf("Role id: %s", id)
+	log.Printf("[DEBUG] Role id: %s", id)
 
 	client := meta.(*kibana.Client)
 
 	err := client.API.KibanaRoleManagement.Delete(id)
 	if err != nil {
 		if err.(kbapi.APIError).Code == 404 {
-			fmt.Printf("[WARN] Role %s not found - removing from state", id)
-			log.Warnf("Role %s not found - removing from state", id)
+			log.Printf("[WARN] Role %s not found - removing from state", id)
 			d.SetId("")
 			return nil
 		}
@@ -226,7 +223,7 @@ func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId("")
 
-	log.Infof("Deleted role %s successfully", id)
+	log.Printf("[INFO] Deleted role %s successfully", id)
 	return nil
 
 }

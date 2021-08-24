@@ -5,10 +5,9 @@ import (
 	"testing"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 func TestAccKibanaObject(t *testing.T) {
@@ -70,7 +69,6 @@ func testCheckKibanaObjectDestroy(s *terraform.State) error {
 			continue
 		}
 
-		log.Debugf("We never delete kibana object")
 	}
 
 	return nil

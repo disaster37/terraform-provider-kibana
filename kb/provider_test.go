@@ -1,23 +1,18 @@
 package kb
 
 import (
+	"log"
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/sirupsen/logrus"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
 var testAccProvider *schema.Provider
 
 func init() {
-
-	// Init logger
-	logrus.SetFormatter(new(prefixed.TextFormatter))
-	logrus.SetLevel(logrus.InfoLevel)
 
 	// Init provider
 	testAccProvider = Provider().(*schema.Provider)

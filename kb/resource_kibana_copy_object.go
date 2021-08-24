@@ -6,13 +6,12 @@
 package kb
 
 import (
-	"fmt"
+	"log"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/disaster37/go-kibana-rest/v7/kbapi"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	log "github.com/sirupsen/logrus"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Resource specification to handle kibana save object
@@ -87,7 +86,7 @@ func resourceKibanaCopyObjectCreate(d *schema.ResourceData, meta interface{}) er
 
 	d.SetId(name)
 
-	log.Infof("Copy objects %s successfully", name)
+	log.Printf("[INFO] Copy objects %s successfully", name)
 
 	return resourceKibanaCopyObjectRead(d, meta)
 }
@@ -103,13 +102,13 @@ func resourceKibanaCopyObjectRead(d *schema.ResourceData, meta interface{}) erro
 	overwrite := d.Get("overwrite").(bool)
 	forceUpdate := d.Get("force_update").(bool)
 
-	log.Debugf("Resource id:  %s", id)
-	log.Debugf("Source space: %s", sourceSpace)
-	log.Debugf("Target spaces: %+v", targetSpaces)
-	log.Debugf("Objects: %+v", objects)
-	log.Debugf("Include reference: %t", includeReference)
-	log.Debugf("Overwrite: %t", overwrite)
-	log.Debugf("force_update: %t", forceUpdate)
+	log.Printf("[DEBUG] Resource id:  %s", id)
+	log.Printf("[DEBUG] Source space: %s", sourceSpace)
+	log.Printf("[DEBUG] Target spaces: %+v", targetSpaces)
+	log.Printf("[DEBUG] Objects: %+v", objects)
+	log.Printf("[DEBUG] Include reference: %t", includeReference)
+	log.Printf("[DEBUG] Overwrite: %t", overwrite)
+	log.Printf("[DEBUG] force_update: %t", forceUpdate)
 
 	// @ TODO
 	// A good when is to check if already exported object is the same that original space
@@ -124,7 +123,7 @@ func resourceKibanaCopyObjectRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("overwrite", overwrite)
 	d.Set("force_update", false)
 
-	log.Infof("Read resource %s successfully", id)
+	log.Printf("[INFO] Read resource %s successfully", id)
 
 	return nil
 }
@@ -138,7 +137,7 @@ func resourceKibanaCopyObjectUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	log.Infof("Updated resource %s successfully", id)
+	log.Printf("[INFO] Updated resource %s successfully", id)
 
 	return resourceKibanaCopyObjectRead(d, meta)
 }
@@ -149,8 +148,7 @@ func resourceKibanaCopyObjectDelete(d *schema.ResourceData, meta interface{}) er
 
 	d.SetId("")
 
-	log.Infof("Delete object in not supported")
-	fmt.Printf("[INFO] Delete object in not supported - just removing from state")
+	log.Printf("[INFO] Delete object in not supported - just removing from state")
 	return nil
 
 }
@@ -180,11 +178,11 @@ func copyObject(d *schema.ResourceData, meta interface{}) error {
 	includeReference := d.Get("include_reference").(bool)
 	overwrite := d.Get("overwrite").(bool)
 
-	log.Debugf("Source space: %s", sourceSpace)
-	log.Debugf("Target spaces: %+v", targetSpaces)
-	log.Debugf("Objects: %+v", objects)
-	log.Debugf("Include reference: %t", includeReference)
-	log.Debugf("Overwrite: %t", overwrite)
+	log.Printf("[DEBUG] Source space: %s", sourceSpace)
+	log.Printf("[DEBUG] Target spaces: %+v", targetSpaces)
+	log.Printf("[DEBUG] Objects: %+v", objects)
+	log.Printf("[DEBUG] Include reference: %t", includeReference)
+	log.Printf("[DEBUG] Overwrite: %t", overwrite)
 
 	client := meta.(*kibana.Client)
 
@@ -208,7 +206,7 @@ func copyObject(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	log.Debugf("Copy object for resource successfully: %s", name)
+	log.Printf("[DEBUG] Copy object for resource successfully: %s", name)
 
 	return nil
 }
