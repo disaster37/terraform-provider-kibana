@@ -2,8 +2,8 @@ package kb
 
 import (
 	"net/url"
-	"time"
 	"os"
+	"time"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/disaster37/go-kibana-rest/v7/kbapi"
@@ -101,7 +101,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	log.SetFormatter(&easy.Formatter{
 		LogFormat: "[%lvl%] %msg%",
 	})
-	log.SetOutput(os.Stdout)
+	log.SetOutput(os.Stderr)
 	log.SetLevel(log.InfoLevel)
 
 	if debug {
