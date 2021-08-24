@@ -1,7 +1,6 @@
 package kb
 
 import (
-	"log"
 	"os"
 	"testing"
 
