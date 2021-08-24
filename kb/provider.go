@@ -3,6 +3,7 @@ package kb
 import (
 	"net/url"
 	"time"
+	"os"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/disaster37/go-kibana-rest/v7/kbapi"
@@ -11,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/t-tomalak/logrus-easy-formatter"
 )
 
 // Provider define kibana provider
@@ -95,6 +97,12 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	retry := d.Get("retry").(int)
 	waitBeforeRetry := d.Get("wait_before_retry").(int)
 	debug := d.Get("debug").(bool)
+
+	log.SetFormatter(&easy.Formatter{
+		LogFormat: "[%lvl%] %msg%",
+	})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.InfoLevel)
 
 	if debug {
 		log.SetLevel(log.DebugLevel)
