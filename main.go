@@ -7,14 +7,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/plugin"
 	log "github.com/sirupsen/logrus"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"github.com/t-tomalak/logrus-easy-formatter"
 )
 
 func main() {
-	formatter := new(prefixed.TextFormatter)
-	formatter.FullTimestamp = true
-	formatter.ForceFormatting = true
-	log.SetFormatter(formatter)
+	log.SetFormatter(&easy.Formatter{
+		LogFormat: "[%lvl%] %msg%",
+	})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.DebugLevel)
 
