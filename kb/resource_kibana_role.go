@@ -404,7 +404,7 @@ func flattenKibanaRoleElasticsearchMappingIndices(krei kbapi.KibanaRoleElasticse
 	if len(krei.FieldSecurity) > 0 {
 		bJSON, err := json.Marshal(krei.FieldSecurity)
 		if err != nil {
-			log.Printf("[ERROR] When convert field_security as string: %w", err)
+			log.Printf("[ERROR] When convert field_security as string: %s", err.Error())
 		} else {
 			tfMap["field_security"] = string(bJSON)
 		}
