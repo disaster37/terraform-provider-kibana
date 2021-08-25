@@ -55,7 +55,6 @@ func testCheckKibanaCopyObjectExists(name string) resource.TestCheckFunc {
 		}
 
 		if len(data) == 0 {
-			panic(fmt.Sprintf("%+v", data))
 			return errors.Errorf("Object %s not found", rs.Primary.ID)
 		}
 

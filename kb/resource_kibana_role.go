@@ -182,7 +182,7 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 	sKRE = append(sKRE, role.Elasticsearch)
 
 	d.Set("name", id)
-	d.Set("elasticsearch", sKRE)
+	//d.Set("elasticsearch", sKRE)
 	d.Set("kibana", role.Kibana)
 	d.Set("metadata", role.Metadata)
 
