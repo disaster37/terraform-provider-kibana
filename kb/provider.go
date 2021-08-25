@@ -1,22 +1,19 @@
 package kb
 
 import (
+	"log"
 	"net/url"
-	"os"
 	"time"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/disaster37/go-kibana-rest/v7/kbapi"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
-	"github.com/t-tomalak/logrus-easy-formatter"
 )
 
 // Provider define kibana provider
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"url": {
@@ -63,12 +60,6 @@ func Provider() terraform.ResourceProvider {
 				Default:     10,
 				Description: "Wait time in second before retry connexion",
 			},
-			"debug": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "Enable debug log level in provider",
-			},
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -96,17 +87,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	password := d.Get("password").(string)
 	retry := d.Get("retry").(int)
 	waitBeforeRetry := d.Get("wait_before_retry").(int)
-	debug := d.Get("debug").(bool)
-
-	log.SetFormatter(&easy.Formatter{
-		LogFormat: "[%lvl%] %msg%",
-	})
-	log.SetOutput(os.Stderr)
-	log.SetLevel(log.InfoLevel)
-
-	if debug {
-		log.SetLevel(log.DebugLevel)
-	}
 
 	// Checks is valid URL
 	if _, err := url.Parse(URL); err != nil {
@@ -153,7 +133,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	version := kibanaStatus["version"].(map[string]interface{})["number"].(string)
-	log.Debugf("Server: %s", version)
+	log.Printf("[DEBUG] Server: %s", version)
 
 	if version < "8.0.0" && version >= "7.0.0" {
 		log.Printf("[INFO] Using Kibana 7")

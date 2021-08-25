@@ -2,13 +2,13 @@ package kb
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 func TestAccKibanaObject(t *testing.T) {
@@ -21,7 +21,7 @@ func TestAccKibanaObject(t *testing.T) {
 		CheckDestroy: testCheckKibanaObjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testKibanaObject,
+				Config: getTestKibanaObject(),
 				Check: resource.ComposeTestCheckFunc(
 					testCheckKibanaObjectExists("kibana_object.test"),
 				),
@@ -70,17 +70,24 @@ func testCheckKibanaObjectDestroy(s *terraform.State) error {
 			continue
 		}
 
-		log.Debugf("We never delete kibana object")
 	}
 
 	return nil
 }
 
-var testKibanaObject = `
+func getTestKibanaObject() string {
+	path, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	return fmt.Sprintf(`
 resource "kibana_object" "test" {
   name 				= "terraform-test"
-  data				= "${file("../fixtures/index-pattern.json")}"
+  data				= file("%s/../fixtures/index-pattern.json")
   deep_reference	= "true"
   export_types    	= ["index-pattern"]
 }
-`
+`, path)
+
+}

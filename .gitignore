@@ -14,3 +14,4 @@
 dist/
 
 coverage.txt
+terraform-provider-kibana

@@ -6,13 +6,14 @@
 package kb
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	kbapi "github.com/disaster37/go-kibana-rest/v7/kbapi"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	log "github.com/sirupsen/logrus"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Resource specification to handle role in Kibana
@@ -36,6 +37,7 @@ func resourceKibanaRole() *schema.Resource {
 			"elasticsearch": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"indices": {
@@ -60,13 +62,11 @@ func resourceKibanaRole() *schema.Resource {
 									"query": {
 										Type:             schema.TypeString,
 										Optional:         true,
-										Default:          "{}",
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 									"field_security": {
 										Type:             schema.TypeString,
 										Optional:         true,
-										Default:          "{}",
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 								},
@@ -92,6 +92,7 @@ func resourceKibanaRole() *schema.Resource {
 			"kibana": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"base": {
@@ -133,7 +134,6 @@ func resourceKibanaRole() *schema.Resource {
 			"metadata": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "{}",
 				DiffSuppressFunc: suppressEquivalentJSON,
 			},
 		},
@@ -152,7 +152,7 @@ func resourceKibanaRoleCreate(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(name)
 
-	log.Infof("Created role %s successfully", name)
+	log.Printf("[INFO] Created role %s successfully", name)
 
 	return resourceKibanaRoleRead(d, meta)
 }
@@ -162,7 +162,7 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	id := d.Id()
 
-	log.Debugf("Role id:  %s", id)
+	log.Printf("[DEBUG] Role id:  %s", id)
 
 	client := meta.(*kibana.Client)
 
@@ -172,20 +172,36 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if role == nil {
-		fmt.Printf("[WARN] Role %s not found - removing from state", id)
-		log.Warnf("Role %s not found - removing from state", id)
+		log.Printf("[WARN] Role %s not found - removing from state", id)
 		d.SetId("")
 		return nil
 	}
 
-	log.Debugf("Get role %s successfully:\n%s", id, role)
+	log.Printf("[DEBUG] Get role %s successfully:\n%s", id, role)
 
 	d.Set("name", id)
-	d.Set("elasticsearch", []kbapi.KibanaRoleElasticsearch{*role.Elasticsearch})
-	d.Set("kibana", role.Kibana)
-	d.Set("metadata", role.Metadata)
 
-	log.Infof("Read role %s successfully", id)
+	flattenKRE, err := flattenKibanaRoleElasticsearchMappings(role.Elasticsearch)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("+%v\n", flattenKRE)
+	if err := d.Set("elasticsearch", flattenKRE); err != nil {
+		return fmt.Errorf("error setting elasticsearch: %w", err)
+	}
+	if err := d.Set("kibana", flattenKibanaRoleKibanaMappings(role.Kibana)); err != nil {
+		return fmt.Errorf("error setting kibana: %w", err)
+	}
+
+	flattenKRM, err := flattenKibanaRoleMetadata(role.Metadata)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("metadata", flattenKRM); err != nil {
+		return fmt.Errorf("error setting metadata: %w", err)
+	}
+
+	log.Printf("[INFO] Read role %s successfully", id)
 
 	return nil
 }
@@ -199,7 +215,7 @@ func resourceKibanaRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	log.Infof("Updated role %s successfully", id)
+	log.Printf("[INFO] Updated role %s successfully", id)
 
 	return resourceKibanaRoleRead(d, meta)
 }
@@ -208,15 +224,14 @@ func resourceKibanaRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 
 	id := d.Id()
-	log.Debugf("Role id: %s", id)
+	log.Printf("[DEBUG] Role id: %s", id)
 
 	client := meta.(*kibana.Client)
 
 	err := client.API.KibanaRoleManagement.Delete(id)
 	if err != nil {
 		if err.(kbapi.APIError).Code == 404 {
-			fmt.Printf("[WARN] Role %s not found - removing from state", id)
-			log.Warnf("Role %s not found - removing from state", id)
+			log.Printf("[WARN] Role %s not found - removing from state", id)
 			d.SetId("")
 			return nil
 		}
@@ -226,7 +241,7 @@ func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId("")
 
-	log.Infof("Deleted role %s successfully", id)
+	log.Printf("[INFO] Deleted role %s successfully", id)
 	return nil
 
 }
@@ -340,4 +355,148 @@ func buildKibanaRoleKibanaFeatures(raws []interface{}) map[string][]string {
 	}
 
 	return features
+}
+
+func flattenKibanaRoleElasticsearchMappings(kre *kbapi.KibanaRoleElasticsearch) ([]interface{}, error) {
+	if kre == nil {
+		return nil, nil
+	}
+
+	var tfList []interface{}
+	flattenKRE, err := flattenKibanaRoleElasticsearchMapping(kre)
+	if err != nil {
+		return nil, err
+	}
+	tfList = append(tfList, flattenKRE)
+
+	return tfList, nil
+}
+
+func flattenKibanaRoleElasticsearchMapping(kre *kbapi.KibanaRoleElasticsearch) (map[string]interface{}, error) {
+	if kre == nil {
+		return nil, nil
+	}
+
+	tfMap := make(map[string]interface{})
+
+	if kre.Indices != nil {
+		flatten, err := flattenKibanaRoleElasticsearchMappingsIndices(kre.Indices)
+		if err != nil {
+			return nil, err
+		}
+		tfMap["indices"] = flatten
+	}
+
+	if kre.Cluster != nil {
+		tfMap["cluster"] = kre.Cluster
+	}
+
+	if kre.RunAs != nil {
+		tfMap["run_as"] = kre.RunAs
+	}
+
+	return tfMap, nil
+}
+
+func flattenKibanaRoleElasticsearchMappingsIndices(krei []kbapi.KibanaRoleElasticsearchIndice) ([]interface{}, error) {
+	if krei == nil {
+		return nil, nil
+	}
+
+	tfList := make([]interface{}, 0)
+
+	for _, item := range krei {
+		flatten, err := flattenKibanaRoleElasticsearchMappingIndices(item)
+		if err != nil {
+			return nil, err
+		}
+		tfList = append(tfList, flatten)
+	}
+
+	return tfList, nil
+}
+
+func flattenKibanaRoleElasticsearchMappingIndices(krei kbapi.KibanaRoleElasticsearchIndice) (map[string]interface{}, error) {
+
+	tfMap := make(map[string]interface{})
+
+	tfMap["names"] = krei.Names
+	tfMap["privileges"] = krei.Privileges
+	if krei.Query != nil {
+		bJSON, err := json.Marshal(krei.Query)
+		if err != nil {
+			return nil, err
+		}
+		tfMap["query"] = string(bJSON)
+	} else {
+		tfMap["query"] = nil
+	}
+
+	if krei.FieldSecurity != nil && len(krei.FieldSecurity) > 0 {
+		bJSON, err := json.Marshal(krei.FieldSecurity)
+		if err != nil {
+			return nil, err
+		}
+
+		tfMap["field_security"] = string(bJSON)
+
+	} else {
+		tfMap["field_security"] = nil
+	}
+
+	return tfMap, nil
+
+}
+
+func flattenKibanaRoleFeatureMappings(krf map[string][]string) []interface{} {
+	if krf == nil {
+		return nil
+	}
+
+	tfList := make([]interface{}, 0)
+
+	for name, item := range krf {
+		tfMap := make(map[string]interface{})
+		tfMap["name"] = name
+		tfMap["permissions"] = item
+		tfList = append(tfList, tfMap)
+	}
+
+	return tfList
+}
+
+func flattenKibanaRoleKibanaMapping(krk kbapi.KibanaRoleKibana) map[string]interface{} {
+	tfMap := make(map[string]interface{})
+	tfMap["base"] = krk.Base
+	tfMap["spaces"] = krk.Spaces
+	tfMap["features"] = flattenKibanaRoleFeatureMappings(krk.Feature)
+
+	return tfMap
+}
+
+func flattenKibanaRoleKibanaMappings(krk []kbapi.KibanaRoleKibana) []interface{} {
+	if krk == nil {
+		return nil
+	}
+
+	tfList := make([]interface{}, 0, len(krk))
+
+	for _, item := range krk {
+		tfList = append(tfList, flattenKibanaRoleKibanaMapping(item))
+	}
+
+	return tfList
+}
+
+func flattenKibanaRoleMetadata(m map[string]interface{}) (interface{}, error) {
+	if m == nil || len(m) == 0 {
+		return nil, nil
+	}
+
+	bJSON, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+
+	return string(bJSON), nil
 }

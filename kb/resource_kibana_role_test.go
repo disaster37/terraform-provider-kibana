@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/pkg/errors"
 )
 
@@ -26,13 +26,14 @@ func TestAccKibanaRole(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "kibana_role.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"elasticsearch", "kibana", "metadata"},
+				ResourceName:      "kibana_role.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+				//ImportStateVerifyIgnore: []string{"elasticsearch", "kibana", "metadata"},
 			},
 		},
 	})
+
 }
 
 func testCheckKibanaRoleExists(name string) resource.TestCheckFunc {

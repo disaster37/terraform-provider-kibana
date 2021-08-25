@@ -19,7 +19,7 @@ test: fmtcheck
 	go test $(TEST) -timeout=30s -parallel=4
 
 testacc: fmt fmtcheck
-	KIBANA_URL=${KIBANA_URL} KIBANA_USERNAME=${KIBANA_USERNAME} KIBANA_PASSWORD=${KIBANA_PASSWORD} TF_ACC=1 go test $(TEST) -v -count 1 -parallel 1 -race -coverprofile=coverage.txt -covermode=atomic $(TESTARGS) -timeout 120m
+	KIBANA_URL=${KIBANA_URL} KIBANA_USERNAME=${KIBANA_USERNAME} KIBANA_PASSWORD=${KIBANA_PASSWORD} TF_ACC=1 TF_LOG_PROVIDER=DEBUG go test $(TEST) -v -count 1 -parallel 1 -race -coverprofile=coverage.txt -covermode=atomic $(TESTARGS) -timeout 120m
 
 fmt:
 	@echo "==> Fixing source code with gofmt..."
