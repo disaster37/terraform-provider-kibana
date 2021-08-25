@@ -2,8 +2,6 @@ package kb
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"testing"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
