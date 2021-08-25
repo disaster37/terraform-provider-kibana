@@ -60,15 +60,15 @@ func resourceKibanaRole() *schema.Resource {
 										},
 									},
 									"query": {
-										Type:             schema.TypeString,
-										Optional:         true,
-										Default:          "{}",
-										DiffSuppressFunc: suppressEquivalentJSON,
-									},
-									"field_security": {
 										Type:     schema.TypeString,
 										Optional: true,
 										//Default:          "{}",
+										DiffSuppressFunc: suppressEquivalentJSON,
+									},
+									"field_security": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										Default:          "{}",
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 								},
@@ -434,7 +434,7 @@ func flattenKibanaRoleElasticsearchMappingIndices(krei kbapi.KibanaRoleElasticse
 		tfMap["query"] = nil
 	}
 
-	if krei.FieldSecurity != nil {
+	if krei.FieldSecurity != nil && len(krei.FieldSecurity) > 0 {
 		bJSON, err := json.Marshal(krei.FieldSecurity)
 		if err != nil {
 			return nil, err
