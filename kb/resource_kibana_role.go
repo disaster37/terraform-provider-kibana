@@ -60,15 +60,13 @@ func resourceKibanaRole() *schema.Resource {
 										},
 									},
 									"query": {
-										Type:     schema.TypeString,
-										Optional: true,
-										//Default:          "{}",
+										Type:             schema.TypeString,
+										Optional:         true,
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 									"field_security": {
 										Type:             schema.TypeString,
 										Optional:         true,
-										Default:          "{}",
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 								},
@@ -136,7 +134,6 @@ func resourceKibanaRole() *schema.Resource {
 			"metadata": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "{}",
 				DiffSuppressFunc: suppressEquivalentJSON,
 			},
 		},
@@ -492,7 +489,7 @@ func flattenKibanaRoleKibanaMappings(krk []kbapi.KibanaRoleKibana) []interface{}
 }
 
 func flattenKibanaRoleMetadata(m map[string]interface{}) (interface{}, error) {
-	if m == nil {
+	if m == nil || len(m) == 0 {
 		return nil, nil
 	}
 
