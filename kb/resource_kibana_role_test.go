@@ -2,6 +2,8 @@ package kb
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"testing"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
@@ -11,6 +13,8 @@ import (
 )
 
 func TestAccKibanaRole(t *testing.T) {
+
+	log.SetOutput(os.Stdout)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -33,6 +37,7 @@ func TestAccKibanaRole(t *testing.T) {
 			},
 		},
 	})
+
 }
 
 func testCheckKibanaRoleExists(name string) resource.TestCheckFunc {
