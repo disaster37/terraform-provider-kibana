@@ -481,14 +481,14 @@ func flattenKibanaRoleKibanaMappings(krk []kbapi.KibanaRoleKibana) []interface{}
 	return tfList
 }
 
-func flattenKibanaRoleMetadata(m map[string]interface{}) (string, error) {
+func flattenKibanaRoleMetadata(m map[string]interface{}) (interface{}, error) {
 	if m == nil {
-		return "", nil
+		return nil, nil
 	}
 
 	bJSON, err := json.Marshal(m)
 	if err != nil {
-		return "", nil
+		return nil, err
 	}
 
 	return string(bJSON), nil
