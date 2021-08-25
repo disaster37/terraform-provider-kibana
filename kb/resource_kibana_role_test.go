@@ -26,10 +26,10 @@ func TestAccKibanaRole(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "kibana_role.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"elasticsearch", "kibana", "metadata"},
+				ResourceName:      "kibana_role.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+				//ImportStateVerifyIgnore: []string{"elasticsearch", "kibana", "metadata"},
 			},
 		},
 	})
