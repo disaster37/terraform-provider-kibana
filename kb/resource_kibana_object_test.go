@@ -84,7 +84,7 @@ func getTestKibanaObject() string {
 	return fmt.Sprintf(`
 resource "kibana_object" "test" {
   name 				= "terraform-test"
-  data				= file("%s/fixtures/index-pattern.json")
+  data				= file("%s/../fixtures/index-pattern.json")
   deep_reference	= "true"
   export_types    	= ["index-pattern"]
 }

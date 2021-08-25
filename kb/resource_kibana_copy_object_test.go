@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"testing"
+	"os"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -21,7 +22,7 @@ func TestAccKibanaCopyObject(t *testing.T) {
 		CheckDestroy: testCheckKibanaCopyObjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testKibanaCopyObject,
+				Config: getTestKibanaCopyObject(),
 				Check: resource.ComposeTestCheckFunc(
 					testCheckKibanaCopyObjectExists("kibana_copy_object.test"),
 				),
@@ -76,10 +77,17 @@ func testCheckKibanaCopyObjectDestroy(s *terraform.State) error {
 
 }
 
-var testKibanaCopyObject = `
+
+func getTestKibanaCopyObject() string {
+	path, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	return fmt.Sprintf(`
 resource kibana_object "test" {
   name 				= "terraform-test"
-  data				= "${file("../fixtures/test.ndjson")}"
+  data				= file("%s/../fixtures/test.ndjson")
   deep_reference	= "true"
   export_types    	= ["index-pattern"]
 }
@@ -99,4 +107,6 @@ resource kibana_copy_object "test" {
 
   depends_on = [kibana_object.test, kibana_user_space.test]
 }
-`
+`, path)
+
+}
