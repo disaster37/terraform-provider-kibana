@@ -66,9 +66,9 @@ func resourceKibanaRole() *schema.Resource {
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 									"field_security": {
-										Type:     schema.TypeString,
-										Optional: true,
-										//Default:          "{}",
+										Type:             schema.TypeString,
+										Optional:         true,
+										Default:          "{}",
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 								},
@@ -188,6 +188,7 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("+%v\n", flattenKRE)
 	if err := d.Set("elasticsearch", flattenKRE); err != nil {
 		return fmt.Errorf("error setting elasticsearch: %w", err)
 	}
