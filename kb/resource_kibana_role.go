@@ -36,6 +36,7 @@ func resourceKibanaRole() *schema.Resource {
 			"elasticsearch": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"indices": {
@@ -92,6 +93,7 @@ func resourceKibanaRole() *schema.Resource {
 			"kibana": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"base": {
@@ -179,13 +181,11 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Get role %s successfully:\n%s", id, role)
 
-	sKRE := make([]*kbapi.KibanaRoleElasticsearch, 0)
-	sKRE = append(sKRE, role.Elasticsearch)
-
-	fmt.Printf("%+v", role)
-
 	d.Set("name", id)
-	d.Set("elasticsearch", sKRE)
+
+	if err := d.Set("elasticsearch", flattenKibanaRoleElasticsearchMappings(role.Elasticsearch)); err != nil {
+		return fmt.Errorf("error setting elasticsearch: %w", err)
+	}
 	d.Set("kibana", role.Kibana)
 	d.Set("metadata", role.Metadata)
 
@@ -343,4 +343,64 @@ func buildKibanaRoleKibanaFeatures(raws []interface{}) map[string][]string {
 	}
 
 	return features
+}
+
+func flattenKibanaRoleElasticsearchMappings(kre *kbapi.KibanaRoleElasticsearch) []interface{} {
+	if kre == nil {
+		return nil
+	}
+
+	var tfList []interface{}
+	tfList = append(tfList, flattenKibanaRoleElasticsearchMapping(kre))
+
+	return tfList
+}
+
+func flattenKibanaRoleElasticsearchMapping(kre *kbapi.KibanaRoleElasticsearch) map[string]interface{} {
+	if kre == nil {
+		return nil
+	}
+
+	tfMap := make(map[string]interface{})
+
+	if kre.Indices != nil {
+		tfMap["indices"] = flattenKibanaRoleElasticsearchMappingsIndices(kre.Indices)
+	}
+
+	if kre.Cluster != nil {
+		tfMap["cluster"] = kre.Cluster
+	}
+
+	if kre.RunAs != nil {
+		tfMap["run_as"] = kre.RunAs
+	}
+
+	return tfMap
+}
+
+func flattenKibanaRoleElasticsearchMappingsIndices(krei []kbapi.KibanaRoleElasticsearchIndice) []interface{} {
+	if krei == nil {
+		return nil
+	}
+
+	tfList := make([]interface{}, 0)
+
+	for _, item := range krei {
+		tfList = append(tfList, flattenKibanaRoleElasticsearchMappingIndices(item))
+	}
+
+	return tfList
+}
+
+func flattenKibanaRoleElasticsearchMappingIndices(krei kbapi.KibanaRoleElasticsearchIndice) map[string]interface{} {
+
+	tfMap := make(map[string]interface{})
+
+	tfMap["names"] = krei.Names
+	tfMap["privileges"] = krei.Privileges
+	tfMap["query"] = krei.Query
+	tfMap["field_security"] = krei.FieldSecurity
+
+	return tfMap
+
 }
