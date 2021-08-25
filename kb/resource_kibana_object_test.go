@@ -21,7 +21,7 @@ func TestAccKibanaObject(t *testing.T) {
 		CheckDestroy: testCheckKibanaObjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testKibanaObject,
+				Config: getTestKibanaObject(),
 				Check: resource.ComposeTestCheckFunc(
 					testCheckKibanaObjectExists("kibana_object.test"),
 				),
@@ -75,11 +75,19 @@ func testCheckKibanaObjectDestroy(s *terraform.State) error {
 	return nil
 }
 
-var testKibanaObject = fmt.Sprintf(`
+func getTestKibanaObject() string {
+	path, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+
+	return fmt.Sprintf(`
 resource "kibana_object" "test" {
   name 				= "terraform-test"
   data				= file("%s/fixtures/index-pattern.json")
   deep_reference	= "true"
   export_types    	= ["index-pattern"]
 }
-`, os.Getwd())
+`, path)
+
+}
