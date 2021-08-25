@@ -66,9 +66,9 @@ func resourceKibanaRole() *schema.Resource {
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 									"field_security": {
-										Type:             schema.TypeString,
-										Optional:         true,
-										Default:          "{}",
+										Type:     schema.TypeString,
+										Optional: true,
+										//Default:          "{}",
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 								},
