@@ -136,6 +136,7 @@ func resourceKibanaRole() *schema.Resource {
 			"metadata": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Default:          nil,
 				DiffSuppressFunc: suppressEquivalentJSON,
 			},
 		},
