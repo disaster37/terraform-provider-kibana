@@ -14,7 +14,7 @@ import (
 
 func TestAccKibanaRole(t *testing.T) {
 
-	log.SetOutput(os.Stdout)
+	log.SetOutput(os.Stderr)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
