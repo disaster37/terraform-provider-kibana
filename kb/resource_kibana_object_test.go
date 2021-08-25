@@ -2,6 +2,7 @@ package kb
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
@@ -74,11 +75,11 @@ func testCheckKibanaObjectDestroy(s *terraform.State) error {
 	return nil
 }
 
-var testKibanaObject = `
+var testKibanaObject = fmt.Sprintf(`
 resource "kibana_object" "test" {
   name 				= "terraform-test"
-  data				= file("${path.cwd}/fixtures/index-pattern.json")
+  data				= file("%s/fixtures/index-pattern.json")
   deep_reference	= "true"
   export_types    	= ["index-pattern"]
 }
-`
+`, os.Getwd())
