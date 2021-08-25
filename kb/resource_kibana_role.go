@@ -6,6 +6,7 @@
 package kb
 
 import (
+	"fmt"
 	"log"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
@@ -181,8 +182,10 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 	sKRE := make([]*kbapi.KibanaRoleElasticsearch, 0)
 	sKRE = append(sKRE, role.Elasticsearch)
 
+	fmt.Printf("%+v", role)
+
 	d.Set("name", id)
-	//d.Set("elasticsearch", sKRE)
+	d.Set("elasticsearch", sKRE)
 	d.Set("kibana", role.Kibana)
 	d.Set("metadata", role.Metadata)
 
