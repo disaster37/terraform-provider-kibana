@@ -184,11 +184,24 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("name", id)
 
-	if err := d.Set("elasticsearch", flattenKibanaRoleElasticsearchMappings(role.Elasticsearch)); err != nil {
+	flattenKRE, err := flattenKibanaRoleElasticsearchMappings(role.Elasticsearch)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("elasticsearch", flattenKRE); err != nil {
 		return fmt.Errorf("error setting elasticsearch: %w", err)
 	}
-	d.Set("kibana", role.Kibana)
-	d.Set("metadata", role.Metadata)
+	if err := d.Set("kibana", flattenKibanaRoleKibanaMappings(role.Kibana)); err != nil {
+		return fmt.Errorf("error setting kibana: %w", err)
+	}
+
+	flattenKRM, err := flattenKibanaRoleMetadata(role.Metadata)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("metadata", flattenKRM); err != nil {
+		return fmt.Errorf("error setting metadata: %w", err)
+	}
 
 	log.Printf("[INFO] Read role %s successfully", id)
 
@@ -346,26 +359,34 @@ func buildKibanaRoleKibanaFeatures(raws []interface{}) map[string][]string {
 	return features
 }
 
-func flattenKibanaRoleElasticsearchMappings(kre *kbapi.KibanaRoleElasticsearch) []interface{} {
+func flattenKibanaRoleElasticsearchMappings(kre *kbapi.KibanaRoleElasticsearch) ([]interface{}, error) {
 	if kre == nil {
-		return nil
+		return nil, nil
 	}
 
 	var tfList []interface{}
-	tfList = append(tfList, flattenKibanaRoleElasticsearchMapping(kre))
+	flattenKRE, err := flattenKibanaRoleElasticsearchMapping(kre)
+	if err != nil {
+		return nil, err
+	}
+	tfList = append(tfList, flattenKRE)
 
-	return tfList
+	return tfList, nil
 }
 
-func flattenKibanaRoleElasticsearchMapping(kre *kbapi.KibanaRoleElasticsearch) map[string]interface{} {
+func flattenKibanaRoleElasticsearchMapping(kre *kbapi.KibanaRoleElasticsearch) (map[string]interface{}, error) {
 	if kre == nil {
-		return nil
+		return nil, nil
 	}
 
 	tfMap := make(map[string]interface{})
 
 	if kre.Indices != nil {
-		tfMap["indices"] = flattenKibanaRoleElasticsearchMappingsIndices(kre.Indices)
+		flatten, err := flattenKibanaRoleElasticsearchMappingsIndices(kre.Indices)
+		if err != nil {
+			return nil, err
+		}
+		tfMap["indices"] = flatten
 	}
 
 	if kre.Cluster != nil {
@@ -376,24 +397,28 @@ func flattenKibanaRoleElasticsearchMapping(kre *kbapi.KibanaRoleElasticsearch) m
 		tfMap["run_as"] = kre.RunAs
 	}
 
-	return tfMap
+	return tfMap, nil
 }
 
-func flattenKibanaRoleElasticsearchMappingsIndices(krei []kbapi.KibanaRoleElasticsearchIndice) []interface{} {
+func flattenKibanaRoleElasticsearchMappingsIndices(krei []kbapi.KibanaRoleElasticsearchIndice) ([]interface{}, error) {
 	if krei == nil {
-		return nil
+		return nil, nil
 	}
 
 	tfList := make([]interface{}, 0)
 
 	for _, item := range krei {
-		tfList = append(tfList, flattenKibanaRoleElasticsearchMappingIndices(item))
+		flatten, err := flattenKibanaRoleElasticsearchMappingIndices(item)
+		if err != nil {
+			return nil, err
+		}
+		tfList = append(tfList, flatten)
 	}
 
-	return tfList
+	return tfList, nil
 }
 
-func flattenKibanaRoleElasticsearchMappingIndices(krei kbapi.KibanaRoleElasticsearchIndice) map[string]interface{} {
+func flattenKibanaRoleElasticsearchMappingIndices(krei kbapi.KibanaRoleElasticsearchIndice) (map[string]interface{}, error) {
 
 	tfMap := make(map[string]interface{})
 
@@ -404,12 +429,66 @@ func flattenKibanaRoleElasticsearchMappingIndices(krei kbapi.KibanaRoleElasticse
 	if len(krei.FieldSecurity) > 0 {
 		bJSON, err := json.Marshal(krei.FieldSecurity)
 		if err != nil {
-			log.Printf("[ERROR] When convert field_security as string: %s", err.Error())
-		} else {
-			tfMap["field_security"] = string(bJSON)
+			return nil, err
 		}
+
+		tfMap["field_security"] = string(bJSON)
+
 	}
 
-	return tfMap
+	return tfMap, nil
 
+}
+
+func flattenKibanaRoleFeatureMappings(krf map[string][]string) []interface{} {
+	if krf == nil {
+		return nil
+	}
+
+	tfList := make([]interface{}, 0)
+
+	for name, item := range krf {
+		tfMap := make(map[string]interface{})
+		tfMap["name"] = name
+		tfMap["permissions"] = item
+		tfList = append(tfList, tfMap)
+	}
+
+	return tfList
+}
+
+func flattenKibanaRoleKibanaMapping(krk kbapi.KibanaRoleKibana) map[string]interface{} {
+	tfMap := make(map[string]interface{})
+	tfMap["base"] = krk.Base
+	tfMap["spaces"] = krk.Spaces
+	tfMap["features"] = flattenKibanaRoleFeatureMappings(krk.Feature)
+
+	return tfMap
+}
+
+func flattenKibanaRoleKibanaMappings(krk []kbapi.KibanaRoleKibana) []interface{} {
+	if krk == nil {
+		return nil
+	}
+
+	tfList := make([]interface{}, 0, len(krk))
+
+	for _, item := range krk {
+		tfList = append(tfList, flattenKibanaRoleKibanaMapping(item))
+	}
+
+	return tfList
+}
+
+func flattenKibanaRoleMetadata(m map[string]interface{}) (string, error) {
+	if m == nil {
+		return "", nil
+	}
+
+	bJSON, err := json.Marshal(m)
+	if err != nil {
+		return "", nil
+	}
+
+	return string(bJSON), nil
 }
