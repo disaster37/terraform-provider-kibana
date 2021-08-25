@@ -178,8 +178,11 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Get role %s successfully:\n%s", id, role)
 
+	sKRE := make([]kbapi.KibanaRoleElasticsearch, 0)
+	sKRE = append(sKRE, *role.Elasticsearch)
+
 	d.Set("name", id)
-	d.Set("elasticsearch", []kbapi.KibanaRoleElasticsearch{*role.Elasticsearch})
+	d.Set("elasticsearch", sKRE)
 	d.Set("kibana", role.Kibana)
 	d.Set("metadata", role.Metadata)
 
