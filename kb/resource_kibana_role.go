@@ -424,7 +424,7 @@ func flattenKibanaRoleElasticsearchMappingIndices(krei kbapi.KibanaRoleElasticse
 
 	tfMap["names"] = krei.Names
 	tfMap["privileges"] = krei.Privileges
-	if krei.Query.(string) != "" {
+	if krei.Query != nil && krei.Query.(string) != "" {
 		tfMap["query"] = krei.Query
 	}
 
