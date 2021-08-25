@@ -62,13 +62,13 @@ func resourceKibanaRole() *schema.Resource {
 									"query": {
 										Type:             schema.TypeString,
 										Optional:         true,
-										Default:          "{}",
+										Default:          "",
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 									"field_security": {
 										Type:             schema.TypeString,
 										Optional:         true,
-										Default:          "{}",
+										Default:          "",
 										DiffSuppressFunc: suppressEquivalentJSON,
 									},
 								},
@@ -136,7 +136,7 @@ func resourceKibanaRole() *schema.Resource {
 			"metadata": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Default:          "{}",
+				Default:          "",
 				DiffSuppressFunc: suppressEquivalentJSON,
 			},
 		},
