@@ -14,4 +14,10 @@
 dist/
 
 coverage.txt
+
+# Add terraform exclusion
 terraform-provider-kibana
+*.tfstate
+*.tfstate.*
+.terraform
+.terraform.lock.hcl
