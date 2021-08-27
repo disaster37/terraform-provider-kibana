@@ -15,3 +15,9 @@ dist/
 
 coverage.txt
 terraform-provider-kibana
+
+# terraform
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+.terraform
