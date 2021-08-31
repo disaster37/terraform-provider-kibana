@@ -185,10 +185,12 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("+%v\n", flattenKRE)
+
+	log.Printf("[DEBUG] Flaten ES: +%v\n", flattenKRE)
 	if err := d.Set("elasticsearch", flattenKRE); err != nil {
 		return fmt.Errorf("error setting elasticsearch: %w", err)
 	}
+
 	if err := d.Set("kibana", flattenKibanaRoleKibanaMappings(role.Kibana)); err != nil {
 		return fmt.Errorf("error setting kibana: %w", err)
 	}
@@ -358,7 +360,9 @@ func buildKibanaRoleKibanaFeatures(raws []interface{}) map[string][]string {
 }
 
 func flattenKibanaRoleElasticsearchMappings(kre *kbapi.KibanaRoleElasticsearch) ([]interface{}, error) {
-	if kre == nil {
+
+	// Handle empty object
+	if kre == nil || (len(kre.Cluster) == 0 && len(kre.Indices) == 0 && len(kre.RunAs) == 0) {
 		return nil, nil
 	}
 
@@ -387,11 +391,11 @@ func flattenKibanaRoleElasticsearchMapping(kre *kbapi.KibanaRoleElasticsearch) (
 		tfMap["indices"] = flatten
 	}
 
-	if kre.Cluster != nil {
+	if kre.Cluster != nil && len(kre.Cluster) > 0 {
 		tfMap["cluster"] = kre.Cluster
 	}
 
-	if kre.RunAs != nil {
+	if kre.RunAs != nil && len(kre.RunAs) > 0 {
 		tfMap["run_as"] = kre.RunAs
 	}
 
