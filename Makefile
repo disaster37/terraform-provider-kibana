@@ -12,8 +12,8 @@ build: fmt fmtcheck
 	go install
 
 local-build:
-	mkdir -p registry/registry.terraform.io/disaster37/kibana/1.0.0/linux_amd64
-	go build -o registry/registry.terraform.io/disaster37/kibana/1.0.0/linux_amd64/terraform-provider-kibana
+	mkdir -p /usr/share/terraform/plugins/registry.terraform.io/disaster37/kibana/1.0.0/linux_amd64
+	go build -o /usr/share/terraform/plugins/registry.terraform.io/disaster37/kibana/1.0.0/linux_amd64/terraform-provider-kibana
 
 gen:
 	rm -f aws/internal/keyvaluetags/*_gen.go
