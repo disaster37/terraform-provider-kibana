@@ -3,8 +3,8 @@ package kb
 import (
 	"fmt"
 	"log"
-	"testing"
 	"os"
+	"testing"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -76,7 +76,6 @@ func testCheckKibanaCopyObjectDestroy(s *terraform.State) error {
 	return nil
 
 }
-
 
 func getTestKibanaCopyObject() string {
 	path, err := os.Getwd()

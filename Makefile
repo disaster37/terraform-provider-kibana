@@ -11,6 +11,10 @@ default: build
 build: fmt fmtcheck
 	go install
 
+local-build:
+	mkdir -p registry/registry.terraform.io/disaster37/kibana/1.0.0/linux_amd64
+	go build -o registry/registry.terraform.io/disaster37/kibana/1.0.0/linux_amd64/terraform-provider-kibana
+
 gen:
 	rm -f aws/internal/keyvaluetags/*_gen.go
 	go generate ./...
@@ -89,4 +93,14 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
-.PHONY: build gen sweep test testacc fmt fmtcheck lint tools test-compile website website-lint website-test
+start-pods: clean-pods
+	kubectl run elasticsearch --image docker.elastic.co/elasticsearch/elasticsearch:7.5.1 --port "9200" --expose --env "cluster.name=test" --env "discovery.type=single-node" --env "ELASTIC_PASSWORD=changeme" --env "xpack.security.enabled=true" --env "ES_JAVA_OPTS=-Xms512m -Xmx512m" --env "path.repo=/tmp" --limits "cpu=500m,memory=1024Mi"
+	kubectl run kibana --image docker.elastic.co/kibana/kibana:7.5.1 --expose --port "5601" --env "ELASTICSEARCH_HOSTS=http://elasticsearch:9200" --env "ELASTICSEARCH_USERNAME=elastic" --env "ELASTICSEARCH_PASSWORD=changeme" --limits "cpu=500m,memory=512Mi"
+
+clean-pods:
+	kubectl delete --ignore-not-found pod/kibana
+	kubectl delete --ignore-not-found service/kibana
+	kubectl delete --ignore-not-found pod/elasticsearch
+	kubectl delete --ignore-not-found service/elasticsearch
+
+.PHONY: build gen sweep test testacc fmt fmtcheck lint tools test-compile website website-lint website-test start-pods clean-pods local-build

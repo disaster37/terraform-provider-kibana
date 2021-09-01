@@ -2,8 +2,11 @@ terraform {
   required_providers {
     kibana = {
       source = "disaster37/kibana"
+      version = "1.0.0"
     }
   }
+
+  
 }
 
 provider "kibana" {
