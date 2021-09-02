@@ -2,7 +2,6 @@ package kb
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"testing"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 func TestAccKibanaCopyObject(t *testing.T) {
@@ -69,7 +69,7 @@ func testCheckKibanaCopyObjectDestroy(s *terraform.State) error {
 			continue
 		}
 
-		log.Printf("We never delete kibana object")
+		log.Warn("We never delete kibana object")
 
 	}
 
