@@ -6,11 +6,9 @@
 package kb
 
 import (
-	"log"
-
 	kibana "github.com/disaster37/go-kibana-rest/v7"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	log "github.com/sirupsen/logrus"
 )
 
 // Resource specification to handle kibana save object
@@ -81,7 +79,7 @@ func resourceKibanaObjectCreate(d *schema.ResourceData, meta interface{}) error 
 
 	d.SetId(name)
 
-	log.Printf("[INFO] Imported objects %s successfully", name)
+	log.Infof("Imported objects %s successfully", name)
 
 	return resourceKibanaObjectRead(d, meta)
 }
@@ -95,10 +93,10 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 	deepReference := d.Get("deep_reference").(bool)
 	space := d.Get("space").(string)
 
-	log.Printf("[DEBUG] Object id:  %s", id)
-	log.Printf("[DEBUG] Export types: %+v", exportTypes)
-	log.Printf("[DEBUG] Export Objects: %+v", exportObjects)
-	log.Printf("[DEBUG] Space: %s", space)
+	log.Debugf("Object id:  %s", id)
+	log.Debugf("Export types: %+v", exportTypes)
+	log.Debugf("Export Objects: %+v", exportObjects)
+	log.Debugf("Space: %s", space)
 
 	client := meta.(*kibana.Client)
 
@@ -108,12 +106,12 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if len(data) == 0 {
-		log.Printf("[WARN] Export object %s not found - removing from state", id)
+		log.Warnf("Export object %s not found - removing from state", id)
 		d.SetId("")
 		return nil
 	}
 
-	log.Printf("[DEBUG] Export object %s successfully:\n%+v", id, string(data))
+	log.Debugf("Export object %s successfully:\n%+v", id, string(data))
 
 	d.Set("name", id)
 	d.Set("data", string(data))
@@ -121,7 +119,7 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("export_types", exportTypes)
 	d.Set("export_objects", exportObjects)
 
-	log.Printf("[INFO] Export object %s successfully", id)
+	log.Infof("Export object %s successfully", id)
 
 	return nil
 }
@@ -135,7 +133,7 @@ func resourceKibanaObjectUpdate(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	log.Printf("[INFO] Updated object %s successfully", id)
+	log.Infof("Updated object %s successfully", id)
 
 	return resourceKibanaObjectRead(d, meta)
 }
@@ -146,7 +144,7 @@ func resourceKibanaObjectDelete(d *schema.ResourceData, meta interface{}) error 
 
 	d.SetId("")
 
-	log.Printf("[INFO] Delete object in not supported - just removing from state")
+	log.Infof("Delete object in not supported - just removing from state")
 	return nil
 
 }
@@ -173,7 +171,7 @@ func importObject(d *schema.ResourceData, meta interface{}) error {
 	data := d.Get("data").(string)
 	space := d.Get("space").(string)
 
-	log.Printf("[DEBUG] Data to import: %s", data)
+	log.Debugf("Data to import: %s", data)
 
 	var (
 		importedData map[string]interface{}
@@ -187,7 +185,7 @@ func importObject(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	log.Printf("[DEBUG] Imported object: %+v", importedData)
+	log.Debugf("Imported object: %+v", importedData)
 
 	return nil
 }

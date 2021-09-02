@@ -3,11 +3,23 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
+	"os"
 
 	"github.com/disaster37/terraform-provider-kibana/v7/kb"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	log "github.com/sirupsen/logrus"
+	easy "github.com/t-tomalak/logrus-easy-formatter"
 )
+
+func init() {
+
+	log.SetOutput(os.Stderr)
+	log.SetLevel(log.DebugLevel)
+	log.SetFormatter(&easy.Formatter{
+		LogFormat: "[%lvl%] %msg%",
+	})
+
+}
 
 func main() {
 

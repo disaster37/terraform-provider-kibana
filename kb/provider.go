@@ -1,15 +1,14 @@
 package kb
 
 import (
-	"log"
 	"net/url"
 	"time"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/disaster37/go-kibana-rest/v7/kbapi"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 // Provider define kibana provider
@@ -133,10 +132,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	version := kibanaStatus["version"].(map[string]interface{})["number"].(string)
-	log.Printf("[DEBUG] Server: %s", version)
+	log.Debugf("Server: %s", version)
 
 	if version < "8.0.0" && version >= "7.0.0" {
-		log.Printf("[INFO] Using Kibana 7")
+		log.Infof("Using Kibana 7")
 		relevantClient = client
 	} else {
 		return nil, errors.New("Kibana is older than 7.0.0")

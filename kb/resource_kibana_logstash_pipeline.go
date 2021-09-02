@@ -6,12 +6,10 @@
 package kb
 
 import (
-	"log"
-
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	kbapi "github.com/disaster37/go-kibana-rest/v7/kbapi"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	log "github.com/sirupsen/logrus"
 )
 
 // Resource specification to handle logstash pipeline in Kibana
@@ -66,7 +64,7 @@ func resourceKibanaLogstashPipelineCreate(d *schema.ResourceData, meta interface
 
 	d.SetId(logstashPipeline.ID)
 
-	log.Printf("[INFO] Created logstash pipeline %s successfully", logstashPipeline.ID)
+	log.Infof("Created logstash pipeline %s successfully", logstashPipeline.ID)
 
 	return resourceKibanaLogstashPipelineRead(d, meta)
 }
@@ -76,7 +74,7 @@ func resourceKibanaLogstashPipelineRead(d *schema.ResourceData, meta interface{}
 
 	id := d.Id()
 
-	log.Printf("[DEBUG] Logstash pipeline id:  %s", id)
+	log.Debugf("Logstash pipeline id:  %s", id)
 
 	client := meta.(*kibana.Client)
 
@@ -86,12 +84,12 @@ func resourceKibanaLogstashPipelineRead(d *schema.ResourceData, meta interface{}
 	}
 
 	if logstashPiepeline == nil {
-		log.Printf("[WARN] Logstash piepline %s not found - removing from state", id)
+		log.Warnf("Logstash piepline %s not found - removing from state", id)
 		d.SetId("")
 		return nil
 	}
 
-	log.Printf("[DEBUG] Get logstash piepeline %s successfully:\n%s", id, logstashPiepeline)
+	log.Debugf("Get logstash piepeline %s successfully:\n%s", id, logstashPiepeline)
 
 	d.Set("name", logstashPiepeline.ID)
 	d.Set("description", logstashPiepeline.Description)
@@ -99,7 +97,7 @@ func resourceKibanaLogstashPipelineRead(d *schema.ResourceData, meta interface{}
 	d.Set("pipeline", logstashPiepeline.Pipeline)
 	d.Set("settings", logstashPiepeline.Settings)
 
-	log.Printf("[INFI] Read logstash pipeline %s successfully", id)
+	log.Infof("Read logstash pipeline %s successfully", id)
 
 	return nil
 }
@@ -112,7 +110,7 @@ func resourceKibanaLogstashPipelineUpdate(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	log.Printf("[INFO] Updated logstash piepeline %s successfully", logstashPipeline.ID)
+	log.Infof("Updated logstash piepeline %s successfully", logstashPipeline.ID)
 
 	return resourceKibanaLogstashPipelineRead(d, meta)
 }
@@ -121,14 +119,14 @@ func resourceKibanaLogstashPipelineUpdate(d *schema.ResourceData, meta interface
 func resourceKibanaLogstashPipelineDelete(d *schema.ResourceData, meta interface{}) error {
 
 	id := d.Id()
-	log.Printf("[DEBUG] Logstash pipeline id: %s", id)
+	log.Debugf("Logstash pipeline id: %s", id)
 
 	client := meta.(*kibana.Client)
 
 	err := client.API.KibanaLogstashPipeline.Delete(id)
 	if err != nil {
 		if err.(kbapi.APIError).Code == 404 {
-			log.Printf("[WARN] Logstash pipeline %s not found - removing from state", id)
+			log.Warnf("Logstash pipeline %s not found - removing from state", id)
 			d.SetId("")
 			return nil
 		}
@@ -138,7 +136,7 @@ func resourceKibanaLogstashPipelineDelete(d *schema.ResourceData, meta interface
 
 	d.SetId("")
 
-	log.Printf("[INFO] Deleted logstash pipeline %s successfully", id)
+	log.Infof("Deleted logstash pipeline %s successfully", id)
 	return nil
 
 }
