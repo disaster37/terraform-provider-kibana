@@ -23,3 +23,14 @@ resource "kibana_role" "test" {
       spaces = ["default"]
   }
 }
+
+resource kibana_role "my_kibana_role" {
+  name = "my_kibana_role"
+  elasticsearch {
+    indices {
+      names = ["*"]
+      privileges = ["read"]
+      field_security = jsonencode({"grant": ["my_field"]})
+    }
+  }
+}

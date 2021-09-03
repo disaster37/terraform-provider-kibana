@@ -14,4 +14,4 @@ EOT
 
 rm -rf .terraform*
 terraform init
-terraform apply
+TF_LOG_PROVIDER=DEBUG terraform apply
