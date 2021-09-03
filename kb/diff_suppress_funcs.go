@@ -17,6 +17,7 @@ func suppressEquivalentJSON(k, old, new string, d *schema.ResourceData) bool {
 	if err := json.Unmarshal([]byte(new), &newObj); err != nil {
 		return false
 	}
+
 	return reflect.DeepEqual(oldObj, newObj)
 }
 

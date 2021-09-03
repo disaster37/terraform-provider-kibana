@@ -16,7 +16,7 @@ func init() {
 	log.SetOutput(os.Stderr)
 	log.SetLevel(log.DebugLevel)
 	log.SetFormatter(&easy.Formatter{
-		LogFormat: "[%lvl%] %msg%",
+		LogFormat: "[%lvl%] %msg%\n",
 	})
 
 }

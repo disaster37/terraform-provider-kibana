@@ -1,6 +1,9 @@
 package kb
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"reflect"
+)
 
 // optionalInterfaceJSON permit to convert string as json object
 func optionalInterfaceJSON(input string) interface{} {
@@ -28,4 +31,21 @@ func convertMapInterfaceToMapString(raws map[string]interface{}) map[string]stri
 	}
 
 	return data
+}
+
+func convertInterfaceToJsonString(object interface{}) (string, error) {
+	if object == nil {
+		return "", nil
+	}
+
+	if reflect.ValueOf(object).Kind() == reflect.Map && reflect.ValueOf(object).Len() == 0 {
+		return "", nil
+	}
+
+	b, err := json.Marshal(object)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
 }
