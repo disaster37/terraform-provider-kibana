@@ -85,7 +85,7 @@ func testCheckKibanaUserSpaceDestroy(s *terraform.State) error {
 
 var testKibanaUserSpace = `
 resource "kibana_user_space" "test" {
-  name 				= "terraform-test"
+  uid 				= "terraform-test"
   description 		= "test"
   initials			= "tt"
   color				= "#000000"

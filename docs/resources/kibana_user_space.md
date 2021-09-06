@@ -12,7 +12,8 @@ It will create `space` called `terraform-test` with some features disabled.
 
 ```tf
 resource kibana_user_space "test" {
-  name 				= "terraform-test"
+  uid 				= "terraform-test"
+  name              = "My terraform test"
   description 		= "test"
   initials			= "tt"
   color				= "#000000"
@@ -23,7 +24,8 @@ resource kibana_user_space "test" {
 ## Argument Reference
 
 ***The following arguments are supported:***
-  - **name**: (required) The user space name to create
+  - **uid**: (required) The user space id to create
+  - **name**: (optional) The name of user space. If not specify, it the same as `uid`.
   - **description**: (optional) The description for user space
   - **disabled_features**: (optional) The list of features you should disabled for this user space.
   - **initials**: (optional) The initial for user space

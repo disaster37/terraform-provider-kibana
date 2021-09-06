@@ -25,10 +25,14 @@ func resourceKibanaUserSpace() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			"uid": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -55,16 +59,21 @@ func resourceKibanaUserSpace() *schema.Resource {
 
 // Create new user space in Kibana
 func resourceKibanaUserSpaceCreate(d *schema.ResourceData, meta interface{}) error {
+	id := d.Get("uid").(string)
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 	disabledFeatures := convertArrayInterfaceToArrayString(d.Get("disabled_features").(*schema.Set).List())
 	initials := d.Get("initials").(string)
 	color := d.Get("color").(string)
 
+	if name == "" {
+		name = id
+	}
+
 	client := meta.(*kibana.Client)
 
 	userSpace := &kbapi.KibanaSpace{
-		ID:               name,
+		ID:               id,
 		Name:             name,
 		Description:      description,
 		DisabledFeatures: disabledFeatures,
@@ -77,9 +86,9 @@ func resourceKibanaUserSpaceCreate(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 
-	d.SetId(name)
+	d.SetId(id)
 
-	log.Infof("Created user space %s successfully", name)
+	log.Infof("Created user space %s (%s) successfully", id, name)
 
 	return resourceKibanaUserSpaceRead(d, meta)
 }
@@ -88,6 +97,7 @@ func resourceKibanaUserSpaceCreate(d *schema.ResourceData, meta interface{}) err
 func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error {
 
 	id := d.Id()
+	name := d.Get("name").(string)
 
 	log.Debugf("User space id:  %s", id)
 
@@ -106,7 +116,13 @@ func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error
 
 	log.Debugf("Get user space %s successfully:\n%s", id, userSpace)
 
-	d.Set("name", id)
+	d.Set("uid", id)
+
+	// Set name only if specify
+	if name != "" {
+		d.Set("name", userSpace.Name)
+	}
+
 	d.Set("description", userSpace.Description)
 	d.Set("disabled_features", userSpace.DisabledFeatures)
 	d.Set("initials", userSpace.Initials)
@@ -120,15 +136,20 @@ func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error
 // Update existing user space in Elasticsearch
 func resourceKibanaUserSpaceUpdate(d *schema.ResourceData, meta interface{}) error {
 	id := d.Id()
+	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 	disabledFeatures := convertArrayInterfaceToArrayString(d.Get("disabled_features").(*schema.Set).List())
 	initials := d.Get("initials").(string)
 	color := d.Get("color").(string)
 
+	if name == "" {
+		name = id
+	}
+
 	client := meta.(*kibana.Client)
 	userSpace := &kbapi.KibanaSpace{
 		ID:               id,
-		Name:             id,
+		Name:             name,
 		Description:      description,
 		DisabledFeatures: disabledFeatures,
 		Initials:         initials,
@@ -145,7 +166,7 @@ func resourceKibanaUserSpaceUpdate(d *schema.ResourceData, meta interface{}) err
 	return resourceKibanaUserSpaceRead(d, meta)
 }
 
-// Delete existing role in Elasticsearch
+// Delete existing user space in Kibana
 func resourceKibanaUserSpaceDelete(d *schema.ResourceData, meta interface{}) error {
 
 	id := d.Id()
