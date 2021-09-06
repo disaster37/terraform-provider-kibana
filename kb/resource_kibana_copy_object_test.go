@@ -92,13 +92,13 @@ resource kibana_object "test" {
 }
 
 resource kibana_user_space "test" {
-  name 				= "terraform-test2"
+  uid 				= "terraform-test2"
 }
 
 resource kibana_copy_object "test" {
   name 				= "terraform-test2"
   source_space		= "default"
-  target_spaces		= ["${kibana_user_space.test.name}"]
+  target_spaces		= ["${kibana_user_space.test.uid}"]
   object {
 	  id   = "test"
 	  type = "index-pattern"
