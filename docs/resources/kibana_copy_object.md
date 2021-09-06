@@ -28,7 +28,8 @@ resource kibana_copy_object "test" {
   - **name**: (required) The unique name
   - **source_space**: (optional) The user space from copy objects. Default to `default`
   - **target_spaces**: (required) The list of space where to copy objects
-  - **overwrite**: (optional) Overwrite existing objects. Default to `true`
+  - **overwrite**: (optional) Overwrite existing objects. Default to `false`
+  - **create_new_copies**: (optional)  Creates new copies of saved objects, regenerates each object ID, and resets the origin. Default to `true`.
   - **object**: (optional) The list of object you should to copy
   - **include_reference**: (optional) Include reference when copy objects. Default to `true`
   - **force_update**: (optional) Force to copy objects each time you apply. Default to `true`
