@@ -103,6 +103,8 @@ resource kibana_copy_object "test" {
 	  id   = "test"
 	  type = "index-pattern"
   }
+  overwrite			= true
+  create_new_copies = false
 
   depends_on = [kibana_object.test, kibana_user_space.test]
 }
