@@ -2,74 +2,25 @@ version: '3'
 
 services:
   elasticsearch:
-    image: ${ES_OSS_IMAGE}
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
     hostname: elasticsearch
     environment:
-      - cluster.name=elasticsearch
-      - bootstrap.memory_lock=true
-      - discovery.type=single-node
-      - path.repo=/tmp
-      - network.publish_host=127.0.0.1
-      - logger.org.elasticsearch=warn
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-    command: ${ES_COMMAND}
-    ulimits:
-      nproc: 65536
-      nofile:
-        soft: 65536
-        hard: 65536
-      memlock:
-        soft: -1
-        hard: -1
+      cluster.name: test
+      discovery.type: "single-node"
+      ELASTIC_PASSWORD: "changeme"
+      xpack.security.enabled: "true"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      path.repo: "/tmp"
     ports:
       - 9200:9200
-  xpack:
-    image: ${ES_IMAGE}
-    hostname: elasticsearch-xpack
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.16.2
+    hostname: kibana
+    depends_on:
+      - "elasticsearch"
     environment:
-      - cluster.name=xpack
-      - bootstrap.memory_lock=true
-      - discovery.type=single-node
-      - path.repo=/tmp
-      - xpack.license.self_generated.type=trial
-      - xpack.security.enabled=true
-      - xpack.watcher.enabled=true
-      - http.port=9210
-      - network.publish_host=127.0.0.1
-      - logger.org.elasticsearch=warn
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - ELASTIC_PASSWORD=elastic
-    ulimits:
-      nproc: 65536
-      nofile:
-        soft: 65536
-        hard: 65536
-      memlock:
-        soft: -1
-        hard: -1
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: changeme
     ports:
-      - 9210:9210
-  opendistro:
-    image: ${ES_OPENDISTRO_IMAGE:-rwgrim/docker-noop}
-    hostname: elasticsearch-opendistro
-    environment:
-      - cluster.name=opendistro
-      - bootstrap.memory_lock=true
-      - discovery.type=single-node
-      - path.repo=/tmp
-      - opendistro_security.disabled=true
-      - http.port=9220
-      - network.publish_host=127.0.0.1
-      - logger.org.elasticsearch=warn
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - ELASTIC_PASSWORD=elastic
-    ulimits:
-      nproc: 65536
-      nofile:
-        soft: 65536
-        hard: 65536
-      memlock:
-        soft: -1
-        hard: -1
-    ports:
-      - 9220:9220
+      - 5601:5601
