@@ -28,11 +28,14 @@ provider "kibana" {
 - **retry**: (optional) The number of time you should to retry connexion befaore exist with error. Default to `6`.
 - **wait_before_retry**: (optional) The number of time in second we wait before each connexion retry. Default to `10`.
 
-
-## Resource / Data
+## Resource
 
 - [kibana_user_space](resources/kibana_user_space.md)
 - [kibana_role](resources/kibana_role.md)
 - [kibana_object](resources/kibana_object.md)
 - [kibana_logstash_pipeline](resources/kibana_logstash_pipeline.md)
 - [kibana_copy_object](resources/kibana_copy_object.md)
+
+## Data Source
+
+- [kibana_host](datasources/kibana_host.md)

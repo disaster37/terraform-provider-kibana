@@ -69,6 +69,10 @@ func Provider() *schema.Provider {
 			"kibana_copy_object":       resourceKibanaCopyObject(),
 		},
 
+		DataSourcesMap: map[string]*schema.Resource{
+			"kibana_host": dataSourceKibanaHost(),
+		},
+
 		ConfigureFunc: providerConfigure,
 	}
 }
