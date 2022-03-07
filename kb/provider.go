@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/coreos/go-semver/semver"
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/disaster37/go-kibana-rest/v7/kbapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -138,10 +139,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	version := kibanaStatus["version"].(map[string]interface{})["number"].(string)
 	log.Debugf("Server: %s", version)
 
-	if version <= "7.0.0" {
-		relevantClient = client
-	} else {
+	vCurrent := semver.New(version)
+	vMinimal := semver.New("7.0.0")
+
+	if vCurrent.LessThan(*vMinimal) {
 		return nil, errors.New("Kibana is older than 7.0.0")
+	} else {
+		relevantClient = client
 	}
 
 	return relevantClient, nil

@@ -97,8 +97,12 @@ endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
 start-pods: clean-pods
-	kubectl run elasticsearch --image docker.elastic.co/elasticsearch/elasticsearch:7.12.1 --port "9200" --expose --env "cluster.name=test" --env "discovery.type=single-node" --env "ELASTIC_PASSWORD=changeme" --env "xpack.security.enabled=true" --env "ES_JAVA_OPTS=-Xms512m -Xmx512m" --env "path.repo=/tmp" --limits "cpu=500m,memory=1024Mi"
-	kubectl run kibana --image docker.elastic.co/kibana/kibana:7.12.1 --expose --port "5601" --env "ELASTICSEARCH_HOSTS=http://elasticsearch:9200" --env "ELASTICSEARCH_USERNAME=elastic" --env "ELASTICSEARCH_PASSWORD=changeme" --limits "cpu=500m,memory=512Mi"
+	kubectl run elasticsearch --image docker.elastic.co/elasticsearch/elasticsearch:8.0.1 --port "9200" --expose --env "cluster.name=test" --env "discovery.type=single-node" --env "ELASTIC_PASSWORD=changeme" --env "xpack.security.enabled=true" --env "ES_JAVA_OPTS=-Xms512m -Xmx512m" --env "path.repo=/tmp" --limits "cpu=500m,memory=1024Mi"
+	kubectl run kibana --image docker.elastic.co/kibana/kibana:8.0.1 --expose --port "5601" --env "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"  --env "ELASTICSEARCH_USERNAME=kibana_system" --env "ELASTICSEARCH_PASSWORD=changeme" --limits "cpu=500m,memory=1Gi"
+	echo "Waiting for Elasticsearch availability"
+	until curl -s http://elasticsearch:9200 | grep -q 'missing authentication credentials'; do sleep 30; done;
+	echo "Setting kibana_system password"
+	until curl -s -X POST -u elastic:changeme -H "Content-Type: application/json" http://elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"changeme\"}" | grep -q "^{}"; do sleep 10; done
 
 clean-pods:
 	kubectl delete --ignore-not-found pod/kibana

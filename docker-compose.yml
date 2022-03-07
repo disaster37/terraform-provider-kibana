@@ -20,7 +20,7 @@ services:
       - "elasticsearch"
     environment:
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_USERNAME: kibana
       ELASTICSEARCH_PASSWORD: changeme
     ports:
       - 5601:5601
