@@ -138,8 +138,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	version := kibanaStatus["version"].(map[string]interface{})["number"].(string)
 	log.Debugf("Server: %s", version)
 
-	if version < "8.0.0" && version >= "7.0.0" {
-		log.Infof("Using Kibana 7")
+	if version <= "7.0.0" {
 		relevantClient = client
 	} else {
 		return nil, errors.New("Kibana is older than 7.0.0")
