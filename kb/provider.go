@@ -140,7 +140,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	log.Debugf("Server: %s", version)
 
 	vCurrent := semver.New(version)
-	vMinimal := semver.New("7.0.0")
+	vMinimal := semver.New("8.0.0")
 
 	if vCurrent.LessThan(*vMinimal) {
 		return nil, errors.New("Kibana is older than 7.0.0")
