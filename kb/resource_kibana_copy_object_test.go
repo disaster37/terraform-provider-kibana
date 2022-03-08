@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	kibana "github.com/disaster37/go-kibana-rest/v7"
+	"github.com/disaster37/go-kibana-rest/v7/kbapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/pkg/errors"
@@ -50,7 +51,9 @@ func testCheckKibanaCopyObjectExists(name string) resource.TestCheckFunc {
 		meta := testAccProvider.Meta()
 
 		client := meta.(*kibana.Client)
-		data, err := client.API.KibanaSavedObject.Get(objectType, objectID, targetSpace)
+		data, err := client.API.KibanaSavedObject.Find(objectType, targetSpace, &kbapi.OptionalFindParameters{
+			Search: fmt.Sprintf("originId:\"%s\"", objectID),
+		})
 		if err != nil {
 			return err
 		}
