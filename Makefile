@@ -103,6 +103,8 @@ start-pods: clean-pods
 	until curl -s http://elasticsearch:9200 | grep -q 'missing authentication credentials'; do sleep 30; done;
 	echo "Setting kibana_system password"
 	until curl -s -X POST -u elastic:changeme -H "Content-Type: application/json" http://elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"changeme\"}" | grep -q "^{}"; do sleep 10; done
+	echo "Enable trial license
+	curl -XPOST -u elastic:changeme http://elasticsearch:9200/_license/start_trial?acknowledge=true
 
 clean-pods:
 	kubectl delete --ignore-not-found pod/kibana
