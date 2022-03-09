@@ -25,7 +25,7 @@ resource kibana_user_space "test" {
 
 ***The following arguments are supported:***
   - **uid**: (required) The user space id to create
-  - **name**: (optional) The name of user space. If not specify, it the same as `uid`.
+  - **name**: (required) The name of user space.
   - **description**: (optional) The description for user space
   - **disabled_features**: (optional) The list of features you should disabled for this user space.
   - **initials**: (optional) The initial for user space
