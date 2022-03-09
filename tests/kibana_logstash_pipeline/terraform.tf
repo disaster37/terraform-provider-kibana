@@ -18,6 +18,7 @@ resource kibana_logstash_pipeline "test" {
     description = "test"
     pipeline = "input { stdin{} } output { stdout{} }"
     settings = {
-    "queue.type" = "persisted"
+        "queue.type" = "persisted"
+        "pipeline.workers" = "8"
     }
 }

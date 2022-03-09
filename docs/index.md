@@ -1,6 +1,6 @@
 # Kibana Provider
 
-This is a terraform provider that lets you provision kibana resources, compatible with v7 of kibana.
+This is a terraform provider that lets you provision kibana resources, compatible with v7, v8 of kibana.
 
 ## Example Usage
 
