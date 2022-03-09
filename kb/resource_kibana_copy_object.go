@@ -6,6 +6,8 @@
 package kb
 
 import (
+	"fmt"
+
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/disaster37/go-kibana-rest/v7/kbapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -90,6 +92,7 @@ func resourceKibanaCopyObjectCreate(d *schema.ResourceData, meta interface{}) er
 	d.SetId(name)
 
 	log.Infof("Copy objects %s successfully", name)
+	fmt.Printf("[INFO] Copy objects %s successfully", name)
 
 	return resourceKibanaCopyObjectRead(d, meta)
 }
@@ -130,6 +133,7 @@ func resourceKibanaCopyObjectRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("force_update", false)
 
 	log.Infof("Read resource %s successfully", id)
+	fmt.Printf("[INFO] Read resource %s successfully", id)
 
 	return nil
 }
@@ -144,6 +148,7 @@ func resourceKibanaCopyObjectUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	log.Infof("Updated resource %s successfully", id)
+	fmt.Printf("[INFO] Updated resource %s successfully", id)
 
 	return resourceKibanaCopyObjectRead(d, meta)
 }
@@ -155,6 +160,7 @@ func resourceKibanaCopyObjectDelete(d *schema.ResourceData, meta interface{}) er
 	d.SetId("")
 
 	log.Infof("Delete object in not supported - just removing from state")
+	fmt.Printf("[INFO] Delete object in not supported - just removing from state")
 	return nil
 
 }

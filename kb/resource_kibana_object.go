@@ -6,6 +6,8 @@
 package kb
 
 import (
+	"fmt"
+
 	kibana "github.com/disaster37/go-kibana-rest/v7"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	log "github.com/sirupsen/logrus"
@@ -80,6 +82,7 @@ func resourceKibanaObjectCreate(d *schema.ResourceData, meta interface{}) error 
 	d.SetId(name)
 
 	log.Infof("Imported objects %s successfully", name)
+	fmt.Printf("[INFO] Imported objects %s successfully", name)
 
 	return resourceKibanaObjectRead(d, meta)
 }
@@ -107,6 +110,7 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 
 	if len(data) == 0 {
 		log.Warnf("Export object %s not found - removing from state", id)
+		fmt.Printf("[WARN] Export object %s not found - removing from state", id)
 		d.SetId("")
 		return nil
 	}
@@ -120,6 +124,7 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("export_objects", exportObjects)
 
 	log.Infof("Export object %s successfully", id)
+	fmt.Printf("[INFO] Export object %s successfully", id)
 
 	return nil
 }
@@ -134,6 +139,7 @@ func resourceKibanaObjectUpdate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	log.Infof("Updated object %s successfully", id)
+	fmt.Printf("[INFO] Updated object %s successfully", id)
 
 	return resourceKibanaObjectRead(d, meta)
 }
@@ -145,6 +151,7 @@ func resourceKibanaObjectDelete(d *schema.ResourceData, meta interface{}) error 
 	d.SetId("")
 
 	log.Infof("Delete object in not supported - just removing from state")
+	fmt.Printf("[INFO] Delete object in not supported - just removing from state")
 	return nil
 
 }

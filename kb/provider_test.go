@@ -16,7 +16,7 @@ func init() {
 
 	// Init logger
 	logrus.SetFormatter(new(prefixed.TextFormatter))
-	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetLevel(logrus.InfoLevel)
 
 	// Init provider
 	testAccProvider = Provider()

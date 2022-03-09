@@ -80,10 +80,6 @@ func Provider() *schema.Provider {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
-	var (
-		relevantClient interface{}
-	)
-
 	URL := d.Get("url").(string)
 	insecure := d.Get("insecure").(bool)
 	cacertFiles := convertArrayInterfaceToArrayString(d.Get("cacert_files").(*schema.Set).List())
@@ -144,9 +140,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	if vCurrent.LessThan(*vMinimal) {
 		return nil, errors.New("Kibana is older than 7.0.0")
-	} else {
-		relevantClient = client
 	}
 
-	return relevantClient, nil
+	return client, nil
 }

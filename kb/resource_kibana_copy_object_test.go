@@ -96,6 +96,7 @@ resource kibana_object "test" {
 
 resource kibana_user_space "test" {
   uid 				= "terraform-test2"
+  name				= "terraform-test2"
 }
 
 resource kibana_copy_object "test" {

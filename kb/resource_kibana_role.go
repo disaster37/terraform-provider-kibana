@@ -151,6 +151,7 @@ func resourceKibanaRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(name)
 
 	log.Infof("Created role %s successfully", name)
+	fmt.Printf("[INFO] Created role %s successfully", name)
 
 	return resourceKibanaRoleRead(d, meta)
 }
@@ -171,6 +172,7 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	if role == nil {
 		log.Warnf("Role %s not found - removing from state", id)
+		fmt.Printf("[WARN] Role %s not found - removing from state", id)
 		d.SetId("")
 		return nil
 	}
@@ -202,6 +204,7 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Infof("Read role %s successfully", id)
+	fmt.Printf("[INFO] Read role %s successfully", id)
 
 	return nil
 }
@@ -216,6 +219,7 @@ func resourceKibanaRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Infof("Updated role %s successfully", id)
+	fmt.Printf("[INFO] Updated role %s successfully", id)
 
 	return resourceKibanaRoleRead(d, meta)
 }
@@ -232,6 +236,7 @@ func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		if err.(kbapi.APIError).Code == 404 {
 			log.Warnf("Role %s not found - removing from state", id)
+			fmt.Printf("[WARN] Role %s not found - removing from state", id)
 			d.SetId("")
 			return nil
 		}
@@ -242,6 +247,7 @@ func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	d.SetId("")
 
 	log.Infof("Deleted role %s successfully", id)
+	fmt.Printf("[INFO] Deleted role %s successfully", id)
 	return nil
 
 }
