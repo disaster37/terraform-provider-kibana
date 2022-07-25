@@ -1,7 +1,6 @@
 package kb
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -122,21 +121,6 @@ func suppressEquivalentNDJSON(k, old, new string, d *schema.ResourceData) bool {
 			}
 
 			if oldId == newId {
-				testA, errA := json.Marshal(oldConfig)
-				testB, errB := json.Marshal(newConfig)
-
-				if errA != nil {
-					log.Error(errA)
-				}
-
-				if errA == nil {
-					log.Error(string(testA))
-				}
-
-				if errB == nil {
-					log.Error(string(testB))
-				}
-
 				currentDiff := diff.CompareConfigs(oldConfig, newConfig)
 				log.Debugf("Diff\n: %s", currentDiff.GoStringer())
 
