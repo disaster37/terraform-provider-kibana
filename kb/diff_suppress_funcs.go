@@ -1,6 +1,7 @@
 package kb
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -39,12 +40,26 @@ func suppressEquivalentJSON(k, old, new string, d *schema.ResourceData) bool {
 	return !currentDiff.HasChanged()
 }
 
+// Split NDJson by keeping only not emty lines
+func splitNDJSON(val string) []string {
+	slices := strings.Split(val, "\n")
+	result := []string{}
+
+	for i := range slices {
+		if len(slices[i]) > 0 {
+			result = append(result, slices[i])
+		}
+	}
+
+	return result
+}
+
 // suppressEquivalentNDJSON permit to compare ndjson string
 func suppressEquivalentNDJSON(k, old, new string, d *schema.ResourceData) bool {
 
 	// NDJSON mean sthat each line correspond to JSON struct
-	oldSlice := strings.Split(old, "\n")
-	newSlice := strings.Split(new, "\n")
+	oldSlice := splitNDJSON(old)
+	newSlice := splitNDJSON(new)
 	oldObjSlice := make([]*ucfg.Config, len(oldSlice))
 	newObjSlice := make([]*ucfg.Config, len(newSlice))
 	if len(oldSlice) != len(newSlice) {
@@ -105,7 +120,23 @@ func suppressEquivalentNDJSON(k, old, new string, d *schema.ResourceData) bool {
 				fmt.Printf("[ERR] Error when get ID on new Json: %s\ndata: %s", err.Error(), newSlice[j])
 				return false
 			}
+
 			if oldId == newId {
+				testA, errA := json.Marshal(oldConfig)
+				testB, errB := json.Marshal(newConfig)
+
+				if errA != nil {
+					log.Error(errA)
+				}
+
+				if errA == nil {
+					log.Error(string(testA))
+				}
+
+				if errB == nil {
+					log.Error(string(testB))
+				}
+
 				currentDiff := diff.CompareConfigs(oldConfig, newConfig)
 				log.Debugf("Diff\n: %s", currentDiff.GoStringer())
 
