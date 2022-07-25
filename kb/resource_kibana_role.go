@@ -333,7 +333,7 @@ func buildKibanaRoleElasticsearchIndice(raws []interface{}) ([]kbapi.KibanaRoleE
 		kibanaRoleElasticsearchIndice := kbapi.KibanaRoleElasticsearchIndice{
 			Names:         convertArrayInterfaceToArrayString(m["names"].(*schema.Set).List()),
 			Privileges:    convertArrayInterfaceToArrayString(m["privileges"].(*schema.Set).List()),
-			Query:         optionalInterfaceJSON(m["query"].(string)),
+			Query:         m["query"].(string),
 			FieldSecurity: fieldSecurity,
 		}
 
