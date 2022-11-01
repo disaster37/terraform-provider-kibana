@@ -266,7 +266,10 @@ func createRole(d *schema.ResourceData, meta interface{}) error {
 
 	var metadata map[string]interface{}
 	if metadataTemp != nil {
-		metadata = metadataTemp.(map[string]interface{})
+		err := json.Unmarshal(metadataTemp.(json.RawMessage), &metadata)
+		if err != nil {
+			return err
+		}
 	} else {
 		metadata = nil
 	}
