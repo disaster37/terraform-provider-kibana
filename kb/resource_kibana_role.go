@@ -336,7 +336,7 @@ func buildKibanaRoleElasticsearchIndice(raws []interface{}) ([]kbapi.KibanaRoleE
 		kibanaRoleElasticsearchIndice := kbapi.KibanaRoleElasticsearchIndice{
 			Names:         convertArrayInterfaceToArrayString(m["names"].(*schema.Set).List()),
 			Privileges:    convertArrayInterfaceToArrayString(m["privileges"].(*schema.Set).List()),
-			Query:         optionalInterfaceJSON(m["query"].(string)),
+			Query:         m["query"].(string),
 			FieldSecurity: fieldSecurity,
 		}
 
@@ -448,8 +448,7 @@ func flattenKibanaRoleElasticsearchMappingIndices(krei kbapi.KibanaRoleElasticse
 
 	tfMap["names"] = krei.Names
 	tfMap["privileges"] = krei.Privileges
-	flattenQuerry, err := convertInterfaceToJsonString(krei.Query)
-	tfMap["query"] = flattenQuerry
+	tfMap["query"] = krei.Query
 
 	flattenFieldSecurity, err := convertInterfaceToJsonString(krei.FieldSecurity)
 	if err != nil {
