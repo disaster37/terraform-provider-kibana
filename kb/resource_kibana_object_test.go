@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	kibana "github.com/disaster37/go-kibana-rest/v7"
+	kibana "github.com/disaster37/go-kibana-rest/v8"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/pkg/errors"

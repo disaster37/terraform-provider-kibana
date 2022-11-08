@@ -6,11 +6,13 @@
 package kb
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
-	kibana "github.com/disaster37/go-kibana-rest/v7"
-	kbapi "github.com/disaster37/go-kibana-rest/v7/kbapi"
+	kibana "github.com/disaster37/go-kibana-rest/v8"
+	kbapi "github.com/disaster37/go-kibana-rest/v8/kbapi"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	log "github.com/sirupsen/logrus"
 )
@@ -18,13 +20,13 @@ import (
 // Resource specification to handle role in Kibana
 func resourceKibanaRole() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKibanaRoleCreate,
-		Read:   resourceKibanaRoleRead,
-		Update: resourceKibanaRoleUpdate,
-		Delete: resourceKibanaRoleDelete,
+		CreateContext: resourceKibanaRoleCreate,
+		ReadContext:   resourceKibanaRoleRead,
+		UpdateContext: resourceKibanaRoleUpdate,
+		DeleteContext: resourceKibanaRoleDelete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -139,13 +141,13 @@ func resourceKibanaRole() *schema.Resource {
 }
 
 // Create new role in Kibana
-func resourceKibanaRoleCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	name := d.Get("name").(string)
 
 	err := createRole(d, meta)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(name)
@@ -153,12 +155,13 @@ func resourceKibanaRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Infof("Created role %s successfully", name)
 	fmt.Printf("[INFO] Created role %s successfully", name)
 
-	return resourceKibanaRoleRead(d, meta)
+	return resourceKibanaRoleRead(ctx, d, meta)
 }
 
 // Read existing role in Kibana
-func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaRoleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
+	var err error
 	id := d.Id()
 
 	log.Debugf("Role id:  %s", id)
@@ -167,7 +170,7 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	role, err := client.API.KibanaRoleManagement.Get(id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if role == nil {
@@ -179,28 +182,30 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Debugf("Get role %s successfully:\n%s", id, role)
 
-	d.Set("name", id)
+	if err = d.Set("name", id); err != nil {
+		return diag.FromErr(err)
+	}
 
 	flattenKRE, err := flattenKibanaRoleElasticsearchMappings(role.Elasticsearch)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Debugf("Flatten ES: +%v\n", flattenKRE)
-	if err := d.Set("elasticsearch", flattenKRE); err != nil {
-		return fmt.Errorf("error setting elasticsearch: %w", err)
+	if err = d.Set("elasticsearch", flattenKRE); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting elasticsearch: %w", err))
 	}
 
-	if err := d.Set("kibana", flattenKibanaRoleKibanaMappings(role.Kibana)); err != nil {
-		return fmt.Errorf("error setting kibana: %w", err)
+	if err = d.Set("kibana", flattenKibanaRoleKibanaMappings(role.Kibana)); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting kibana: %w", err))
 	}
 
 	flattenKRM, err := convertInterfaceToJsonString(role.Metadata)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	if err := d.Set("metadata", flattenKRM); err != nil {
-		return fmt.Errorf("error setting metadata: %w", err)
+	if err = d.Set("metadata", flattenKRM); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting metadata: %w", err))
 	}
 
 	log.Infof("Read role %s successfully", id)
@@ -210,22 +215,22 @@ func resourceKibanaRoleRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 // Update existing role in Elasticsearch
-func resourceKibanaRoleUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaRoleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	err := createRole(d, meta)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Infof("Updated role %s successfully", id)
 	fmt.Printf("[INFO] Updated role %s successfully", id)
 
-	return resourceKibanaRoleRead(d, meta)
+	return resourceKibanaRoleRead(ctx, d, meta)
 }
 
 // Delete existing role in Elasticsearch
-func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaRoleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	id := d.Id()
 	log.Debugf("Role id: %s", id)
@@ -240,7 +245,7 @@ func resourceKibanaRoleDelete(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 
 	}
 
@@ -280,7 +285,7 @@ func createRole(d *schema.ResourceData, meta interface{}) error {
 		Metadata:      metadata,
 	}
 
-	role, err = client.API.KibanaRoleManagement.CreateOrUpdate(role)
+	_, err = client.API.KibanaRoleManagement.CreateOrUpdate(role)
 	if err != nil {
 		return err
 	}

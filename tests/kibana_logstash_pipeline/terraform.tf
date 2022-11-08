@@ -17,8 +17,8 @@ resource kibana_logstash_pipeline "test" {
     name = "terraform-test"
     description = "test"
     pipeline = "input { stdin{} } output { stdout{} }"
-    settings = {
-        "queue.type" = "persisted"
-        "pipeline.workers" = "8"
+    settings {
+      pipeline_workers = 6
+      queue_type = "persisted"
     }
 }

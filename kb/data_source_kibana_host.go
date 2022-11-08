@@ -5,14 +5,17 @@
 package kb
 
 import (
-	kibana "github.com/disaster37/go-kibana-rest/v7"
+	"context"
+
+	kibana "github.com/disaster37/go-kibana-rest/v8"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceKibanaHost() *schema.Resource {
 	return &schema.Resource{
 		Description: "`kibana_host` can be used to retrieve the Kibana connection settings.",
-		Read:        dataSourceKibanaHostRead,
+		ReadContext: dataSourceKibanaHostRead,
 
 		Schema: map[string]*schema.Schema{
 			"url": {
@@ -34,10 +37,11 @@ func dataSourceKibanaHost() *schema.Resource {
 	}
 }
 
-func dataSourceKibanaHostRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceKibanaHostRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var url string
 	var username string
 	var password string
+	var err error
 
 	conf := m.(*kibana.Client)
 
@@ -46,9 +50,15 @@ func dataSourceKibanaHostRead(d *schema.ResourceData, m interface{}) error {
 	password = conf.Client.UserInfo.Password
 
 	d.SetId(url)
-	d.Set("url", url)
-	d.Set("username", username)
-	d.Set("password", password)
+	if err = d.Set("url", url); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("username", username); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("password", password); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

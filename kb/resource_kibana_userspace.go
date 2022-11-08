@@ -6,10 +6,12 @@
 package kb
 
 import (
+	"context"
 	"fmt"
 
-	kibana "github.com/disaster37/go-kibana-rest/v7"
-	kbapi "github.com/disaster37/go-kibana-rest/v7/kbapi"
+	kibana "github.com/disaster37/go-kibana-rest/v8"
+	kbapi "github.com/disaster37/go-kibana-rest/v8/kbapi"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	log "github.com/sirupsen/logrus"
 )
@@ -17,13 +19,13 @@ import (
 // Resource specification to handle user space in Kibana
 func resourceKibanaUserSpace() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKibanaUserSpaceCreate,
-		Read:   resourceKibanaUserSpaceRead,
-		Update: resourceKibanaUserSpaceUpdate,
-		Delete: resourceKibanaUserSpaceDelete,
+		CreateContext: resourceKibanaUserSpaceCreate,
+		ReadContext:   resourceKibanaUserSpaceRead,
+		UpdateContext: resourceKibanaUserSpaceUpdate,
+		DeleteContext: resourceKibanaUserSpaceDelete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -60,7 +62,7 @@ func resourceKibanaUserSpace() *schema.Resource {
 }
 
 // Create new user space in Kibana
-func resourceKibanaUserSpaceCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaUserSpaceCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	id := d.Get("uid").(string)
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
@@ -79,9 +81,9 @@ func resourceKibanaUserSpaceCreate(d *schema.ResourceData, meta interface{}) err
 		Color:            color,
 	}
 
-	userSpace, err := client.API.KibanaSpaces.Create(userSpace)
+	_, err := client.API.KibanaSpaces.Create(userSpace)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(id)
@@ -89,12 +91,13 @@ func resourceKibanaUserSpaceCreate(d *schema.ResourceData, meta interface{}) err
 	log.Infof("Created user space %s (%s) successfully", id, name)
 	fmt.Printf("[INFO] Created user space %s (%s) successfully", id, name)
 
-	return resourceKibanaUserSpaceRead(d, meta)
+	return resourceKibanaUserSpaceRead(ctx, d, meta)
 }
 
 // Read existing user space in Kibana
-func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaUserSpaceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
+	var err error
 	id := d.Id()
 
 	log.Debugf("User space id:  %s", id)
@@ -103,7 +106,7 @@ func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error
 
 	userSpace, err := client.API.KibanaSpaces.Get(id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if userSpace == nil {
@@ -115,13 +118,24 @@ func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error
 
 	log.Debugf("Get user space %s successfully:\n%s", id, userSpace)
 
-	d.Set("uid", id)
-
-	d.Set("name", userSpace.Name)
-	d.Set("description", userSpace.Description)
-	d.Set("disabled_features", userSpace.DisabledFeatures)
-	d.Set("initials", userSpace.Initials)
-	d.Set("color", userSpace.Color)
+	if err = d.Set("uid", id); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("name", userSpace.Name); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("description", userSpace.Description); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("disabled_features", userSpace.DisabledFeatures); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("initials", userSpace.Initials); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("color", userSpace.Color); err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Infof("Read user space %s successfully", id)
 	fmt.Printf("[INFO] Read user space %s successfully", id)
@@ -130,7 +144,7 @@ func resourceKibanaUserSpaceRead(d *schema.ResourceData, meta interface{}) error
 }
 
 // Update existing user space in Elasticsearch
-func resourceKibanaUserSpaceUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaUserSpaceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	id := d.Id()
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
@@ -148,19 +162,19 @@ func resourceKibanaUserSpaceUpdate(d *schema.ResourceData, meta interface{}) err
 		Color:            color,
 	}
 
-	userSpace, err := client.API.KibanaSpaces.Update(userSpace)
+	_, err := client.API.KibanaSpaces.Update(userSpace)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Infof("Updated user space %s successfully", id)
 	fmt.Printf("[INFO] Updated user space %s successfully", id)
 
-	return resourceKibanaUserSpaceRead(d, meta)
+	return resourceKibanaUserSpaceRead(ctx, d, meta)
 }
 
 // Delete existing user space in Kibana
-func resourceKibanaUserSpaceDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaUserSpaceDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	id := d.Id()
 	log.Debugf("User space id: %s", id)
@@ -175,7 +189,7 @@ func resourceKibanaUserSpaceDelete(d *schema.ResourceData, meta interface{}) err
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 
 	}
 
