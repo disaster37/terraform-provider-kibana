@@ -1,42 +1,79 @@
 package kb
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/elastic/go-ucfg"
-	"github.com/elastic/go-ucfg/diff"
-	ucfgjson "github.com/elastic/go-ucfg/json"
+	eshandler "github.com/disaster37/es-handler/v8"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	log "github.com/sirupsen/logrus"
 )
 
-// suppressEquivalentJSON permit to compare json string
+// suppressEquivalentJSON permit to compare state store as JSON string
 func suppressEquivalentJSON(k, old, new string, d *schema.ResourceData) bool {
+
+	var err error
+	oldObj := map[string]any{}
+	newObj := map[string]any{}
+
 	if old == "" {
-		old = `{}`
+		old = "{}"
 	}
 	if new == "" {
-		new = `{}`
+		new = "{}"
 	}
-	confOld, err := ucfgjson.NewConfig([]byte(old), ucfg.PathSep("."))
-	if err != nil {
+
+	if err = json.Unmarshal([]byte(old), &oldObj); err != nil {
 		fmt.Printf("[ERR] Error when converting current Json: %s\ndata: %s", err.Error(), old)
 		log.Errorf("Error when converting current Json: %s\ndata: %s", err.Error(), old)
-		return false
 	}
-	confNew, err := ucfgjson.NewConfig([]byte(new), ucfg.PathSep("."))
+	if err = json.Unmarshal([]byte(new), &newObj); err != nil {
+		fmt.Printf("[ERR] Error when converting current Json: %s\ndata: %s", err.Error(), new)
+		log.Errorf("Error when converting current Json: %s\ndata: %s", err.Error(), new)
+	}
+
+	diff, err := eshandler.StandardDiff(oldObj, newObj, logEntry, nil)
 	if err != nil {
-		fmt.Printf("[ERR] Error when converting new Json: %s\ndata: %s", err.Error(), new)
-		log.Errorf("Error when converting new Json: %s\ndata: %s", err.Error(), new)
+		fmt.Printf("[ERR] Error when diff JSON: %s", err.Error())
+		log.Errorf("Error when diff Json: %s", err.Error())
 		return false
 	}
 
-	currentDiff := diff.CompareConfigs(confOld, confNew)
-	log.Debugf("Diff\n: %s", currentDiff.GoStringer())
+	return diff == ""
+}
 
-	return !currentDiff.HasChanged()
+func suppressEquivalentJSONWithExclude(k, old, new string, d *schema.ResourceData, exclude map[string]any) bool {
+
+	var err error
+	oldObj := map[string]any{}
+	newObj := map[string]any{}
+
+	if old == "" {
+		old = "{}"
+	}
+	if new == "" {
+		new = "{}"
+	}
+
+	if err = json.Unmarshal([]byte(old), &oldObj); err != nil {
+		fmt.Printf("[ERR] Error when converting current Json: %s\ndata: %s", err.Error(), old)
+		log.Errorf("Error when converting current Json: %s\ndata: %s", err.Error(), old)
+	}
+	if err = json.Unmarshal([]byte(new), &newObj); err != nil {
+		fmt.Printf("[ERR] Error when converting current Json: %s\ndata: %s", err.Error(), new)
+		log.Errorf("Error when converting current Json: %s\ndata: %s", err.Error(), new)
+	}
+
+	diff, err := eshandler.StandardDiff(oldObj, newObj, logEntry, exclude)
+	if err != nil {
+		fmt.Printf("[ERR] Error when diff JSON: %s", err.Error())
+		log.Errorf("Error when diff Json: %s", err.Error())
+		return false
+	}
+
+	return diff == ""
 }
 
 // Split NDJson by keeping only not emty lines
@@ -56,79 +93,65 @@ func splitNDJSON(val string) []string {
 // suppressEquivalentNDJSON permit to compare ndjson string
 func suppressEquivalentNDJSON(k, old, new string, d *schema.ResourceData) bool {
 
+	var err error
+	excludeFields := map[string]any{
+		"version":              nil,
+		"updated_at":           nil,
+		"coreMigrationVersion": nil,
+		"migrationVersion":     nil,
+		"references":           nil,
+		"sort":                 nil,
+	}
+
 	// NDJSON mean sthat each line correspond to JSON struct
 	oldSlice := splitNDJSON(old)
 	newSlice := splitNDJSON(new)
-	oldObjSlice := make([]*ucfg.Config, len(oldSlice))
-	newObjSlice := make([]*ucfg.Config, len(newSlice))
+	oldObjSlice := make([]map[string]any, len(oldSlice))
+	newObjSlice := make([]map[string]any, len(newSlice))
 	if len(oldSlice) != len(newSlice) {
 		return false
 	}
 
-	// Convert string line to JSON
+	// Convert each line to map of string to compare the same object id
 	for i, oldJSON := range oldSlice {
-		if oldJSON == "" {
-			oldJSON = `{}`
+		res := map[string]any{}
+		if oldJSON != "" {
+			if err = json.Unmarshal([]byte(oldJSON), &res); err != nil {
+				fmt.Printf("[ERR] Error when unmarshal old Json: %s\ndata: %s", err.Error(), oldJSON)
+				log.Errorf("Error when unmarshal old Json: %s\ndata: %s", err.Error(), oldJSON)
+				return false
+			}
 		}
-		config, err := ucfgjson.NewConfig([]byte(oldJSON), ucfg.PathSep("."))
-		if err != nil {
-			fmt.Printf("[ERR] Error when converting current Json: %s\ndata: %s", err.Error(), oldJSON)
-			log.Errorf("Error when converting current Json: %s\ndata: %s", err.Error(), oldJSON)
-			return false
-		}
-		//nolint:errcheck
-		config.Remove("version", -1)
-		//nolint:errcheck
-		config.Remove("updated_at", -1)
-
-		oldObjSlice[i] = config
+		oldObjSlice[i] = res
 	}
-	for i, newJSON := range newSlice {
-		if newJSON == "" {
-			newJSON = `{}`
-		}
-		config, err := ucfgjson.NewConfig([]byte(newJSON), ucfg.PathSep("."))
-		if err != nil {
-			fmt.Printf("[ERR] Error when converting new Json: %s\ndata: %s", err.Error(), newJSON)
-			log.Errorf("Error when converting new Json: %s\ndata: %s", err.Error(), newJSON)
-			return false
-		}
-		//nolint:errcheck
-		config.Remove("version", -1)
-		//nolint:errcheck
-		config.Remove("updated_at", -1)
 
-		newObjSlice[i] = config
+	for i, newJSON := range newSlice {
+		res := map[string]any{}
+		if newJSON != "" {
+			if err = json.Unmarshal([]byte(newJSON), &res); err != nil {
+				fmt.Printf("[ERR] Error when unmarshal nes Json: %s\ndata: %s", err.Error(), newJSON)
+				log.Errorf("Error when unmarshal new Json: %s\ndata: %s", err.Error(), newJSON)
+				return false
+
+			}
+		}
+		newObjSlice[i] = res
 	}
 
 	// Compare json obj
-	for i, oldConfig := range oldObjSlice {
+	for i, oldItem := range oldObjSlice {
 		isFound := false
-		if !oldConfig.HasField("id") {
+		if oldItem["id"] == "" {
 			return false
 		}
-		oldId, err := oldConfig.String("id", -1)
-		if err != nil {
-			log.Errorf("Error when get ID on current Json: %s\ndata: %s", err.Error(), oldSlice[i])
-			fmt.Printf("[ERR] Error when get ID on current Json: %s\ndata: %s", err.Error(), oldSlice[i])
-			return false
-		}
-		for j, newConfig := range newObjSlice {
-			if !newConfig.HasField("id") {
-				return false
-			}
-			newId, err := newConfig.String("id", -1)
-			if err != nil {
-				log.Errorf("Error when get ID on new Json: %s\ndata: %s", err.Error(), newSlice[j])
-				fmt.Printf("[ERR] Error when get ID on new Json: %s\ndata: %s", err.Error(), newSlice[j])
+		for j, newItem := range newObjSlice {
+			if newItem["id"] == "" {
 				return false
 			}
 
-			if oldId == newId {
-				currentDiff := diff.CompareConfigs(oldConfig, newConfig)
-				log.Debugf("Diff\n: %s", currentDiff.GoStringer())
-
-				if currentDiff.HasChanged() {
+			// Compare same items
+			if oldItem["id"] == newItem["id"] {
+				if !suppressEquivalentJSONWithExclude(k, oldSlice[i], newSlice[j], d, excludeFields) {
 					return false
 				}
 				isFound = true

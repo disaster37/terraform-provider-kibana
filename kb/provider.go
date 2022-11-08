@@ -11,8 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
+
+var logEntry *logrus.Entry
 
 // Provider define kibana provider
 func Provider() *schema.Provider {
@@ -62,6 +65,12 @@ func Provider() *schema.Provider {
 				Default:     10,
 				Description: "Wait time in second before retry connexion",
 			},
+			"debug": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Set logger to debug on Elasticsearch client",
+			},
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -89,6 +98,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	password := d.Get("password").(string)
 	retry := d.Get("retry").(int)
 	waitBeforeRetry := d.Get("wait_before_retry").(int)
+	debug := d.Get("debug").(bool)
 
 	// Checks is valid URL
 	if _, err := url.Parse(URL); err != nil {
@@ -112,6 +122,12 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
+
+	logger := log.New()
+	if debug {
+		logger.SetLevel(log.DebugLevel)
+	}
+	logEntry = log.NewEntry(logger)
 
 	// Test connexion and check kibana version
 	nbFailed := 0

@@ -17,5 +17,8 @@ resource "kibana_object" "test" {
   name 				= "terraform-test"
   data				= "{\"id\": \"test\", \"type\": \"index-pattern\",\"attributes\": {\"title\": \"test\"}}"
   deep_reference	= "true"
-  export_types    	= ["index-pattern"]
+  export_objects {
+    id = "test"
+    type = "index-pattern"
+  }
 }
