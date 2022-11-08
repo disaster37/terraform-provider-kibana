@@ -5,6 +5,7 @@ You can see the API documentation: https://www.elastic.co/guide/en/kibana/master
 
 ***Supported Kibana version:***
   - v7
+  - v8
 
 ## Example Usage
 
