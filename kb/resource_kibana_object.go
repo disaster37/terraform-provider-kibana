@@ -6,9 +6,11 @@
 package kb
 
 import (
+	"context"
 	"fmt"
 
-	kibana "github.com/disaster37/go-kibana-rest/v7"
+	kibana "github.com/disaster37/go-kibana-rest/v8"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	log "github.com/sirupsen/logrus"
 )
@@ -16,10 +18,10 @@ import (
 // Resource specification to handle kibana save object
 func resourceKibanaObject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKibanaObjectCreate,
-		Read:   resourceKibanaObjectRead,
-		Update: resourceKibanaObjectUpdate,
-		Delete: resourceKibanaObjectDelete,
+		CreateContext: resourceKibanaObjectCreate,
+		ReadContext:   resourceKibanaObjectRead,
+		UpdateContext: resourceKibanaObjectUpdate,
+		DeleteContext: resourceKibanaObjectDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -71,12 +73,12 @@ func resourceKibanaObject() *schema.Resource {
 }
 
 // Import objects in Kibana
-func resourceKibanaObjectCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaObjectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	name := d.Get("name").(string)
 
 	err := importObject(d, meta)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(name)
@@ -84,12 +86,13 @@ func resourceKibanaObjectCreate(d *schema.ResourceData, meta interface{}) error 
 	log.Infof("Imported objects %s successfully", name)
 	fmt.Printf("[INFO] Imported objects %s successfully", name)
 
-	return resourceKibanaObjectRead(d, meta)
+	return resourceKibanaObjectRead(ctx, d, meta)
 }
 
 // Export objects in Kibana
-func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaObjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
+	var err error
 	id := d.Id()
 	exportTypes := convertArrayInterfaceToArrayString(d.Get("export_types").(*schema.Set).List())
 	exportObjects := buildExportObjects(d.Get("export_objects").(*schema.Set).List())
@@ -105,7 +108,7 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 
 	data, err := client.API.KibanaSavedObject.Export(exportTypes, exportObjects, deepReference, space)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if len(data) == 0 {
@@ -117,11 +120,21 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Debugf("Export object %s successfully:\n%+v", id, string(data))
 
-	d.Set("name", id)
-	d.Set("data", string(data))
-	d.Set("space", space)
-	d.Set("export_types", exportTypes)
-	d.Set("export_objects", exportObjects)
+	if err = d.Set("name", id); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("data", string(data)); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("space", space); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("export_types", exportTypes); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("export_objects", exportObjects); err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Infof("Export object %s successfully", id)
 	fmt.Printf("[INFO] Export object %s successfully", id)
@@ -130,23 +143,23 @@ func resourceKibanaObjectRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 // Update existing object in Kibana
-func resourceKibanaObjectUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaObjectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	err := importObject(d, meta)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Infof("Updated object %s successfully", id)
 	fmt.Printf("[INFO] Updated object %s successfully", id)
 
-	return resourceKibanaObjectRead(d, meta)
+	return resourceKibanaObjectRead(ctx, d, meta)
 }
 
 // Delete object in Kibana is not supported
 // It just remove object from state
-func resourceKibanaObjectDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaObjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	d.SetId("")
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"os"
 
@@ -28,16 +27,9 @@ func main() {
 	flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
 
-	opts := &plugin.ServeOpts{ProviderFunc: kb.Provider}
-
-	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/disaster37/kibana", opts)
-
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-
-		return
+	opts := &plugin.ServeOpts{
+		ProviderFunc: kb.Provider,
+		Debug:        debugMode,
 	}
 
 	plugin.Serve(opts)

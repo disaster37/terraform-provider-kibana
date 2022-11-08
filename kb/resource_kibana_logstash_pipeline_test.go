@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	kibana "github.com/disaster37/go-kibana-rest/v7"
+	kibana "github.com/disaster37/go-kibana-rest/v8"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/pkg/errors"
@@ -88,8 +88,9 @@ resource "kibana_logstash_pipeline" "test" {
   name 				= "terraform-test"
   description 		= "test"
   pipeline			= "input { stdin {} } output { stdout {} }"
-  settings = {
-	  "queue.type" = "persisted"
+  settings {
+	  queue_type = "persisted"
+		pipeline_workers = "8"
   }
 }
 `

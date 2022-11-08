@@ -76,7 +76,9 @@ func suppressEquivalentNDJSON(k, old, new string, d *schema.ResourceData) bool {
 			log.Errorf("Error when converting current Json: %s\ndata: %s", err.Error(), oldJSON)
 			return false
 		}
+		//nolint:errcheck
 		config.Remove("version", -1)
+		//nolint:errcheck
 		config.Remove("updated_at", -1)
 
 		oldObjSlice[i] = config
@@ -91,7 +93,9 @@ func suppressEquivalentNDJSON(k, old, new string, d *schema.ResourceData) bool {
 			log.Errorf("Error when converting new Json: %s\ndata: %s", err.Error(), newJSON)
 			return false
 		}
+		//nolint:errcheck
 		config.Remove("version", -1)
+		//nolint:errcheck
 		config.Remove("updated_at", -1)
 
 		newObjSlice[i] = config
@@ -132,7 +136,7 @@ func suppressEquivalentNDJSON(k, old, new string, d *schema.ResourceData) bool {
 			}
 		}
 
-		if isFound == false {
+		if !isFound {
 			return false
 		}
 	}

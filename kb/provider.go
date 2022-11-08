@@ -1,12 +1,14 @@
 package kb
 
 import (
+	"context"
 	"net/url"
 	"time"
 
 	"github.com/coreos/go-semver/semver"
-	kibana "github.com/disaster37/go-kibana-rest/v7"
-	"github.com/disaster37/go-kibana-rest/v7/kbapi"
+	kibana "github.com/disaster37/go-kibana-rest/v8"
+	"github.com/disaster37/go-kibana-rest/v8/kbapi"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -74,11 +76,11 @@ func Provider() *schema.Provider {
 			"kibana_host": dataSourceKibanaHost(),
 		},
 
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
 	URL := d.Get("url").(string)
 	insecure := d.Get("insecure").(bool)
@@ -90,7 +92,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	// Checks is valid URL
 	if _, err := url.Parse(URL); err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 
 	// Intialise connexion
@@ -102,26 +104,26 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		cfg.Username = username
 		cfg.Password = password
 	}
-	if insecure == true {
+	if insecure {
 		cfg.DisableVerifySSL = true
 	}
 
 	client, err := kibana.NewClient(cfg)
 	if err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 
 	// Test connexion and check kibana version
 	nbFailed := 0
 	isOnline := false
 	var kibanaStatus kbapi.KibanaStatus
-	for isOnline == false {
+	for !isOnline {
 		kibanaStatus, err = client.API.KibanaStatus.Get()
 		if err == nil {
 			isOnline = true
 		} else {
 			if nbFailed == retry {
-				return nil, err
+				return nil, diag.FromErr(err)
 			}
 			nbFailed++
 			time.Sleep(time.Duration(waitBeforeRetry) * time.Second)
@@ -129,7 +131,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	if kibanaStatus == nil {
-		return nil, errors.New("Status is empty, somethink wrong with Kibana ?")
+		return nil, diag.FromErr(errors.New("Status is empty, somethink wrong with Kibana ?"))
 	}
 
 	version := kibanaStatus["version"].(map[string]interface{})["number"].(string)
@@ -139,7 +141,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	vMinimal := semver.New("8.0.0")
 
 	if vCurrent.LessThan(*vMinimal) {
-		return nil, errors.New("Kibana is older than 7.0.0")
+		return nil, diag.FromErr(errors.New("Kibana is older than 7.0.0"))
 	}
 
 	return client, nil

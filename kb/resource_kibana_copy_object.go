@@ -6,10 +6,12 @@
 package kb
 
 import (
+	"context"
 	"fmt"
 
-	kibana "github.com/disaster37/go-kibana-rest/v7"
-	"github.com/disaster37/go-kibana-rest/v7/kbapi"
+	kibana "github.com/disaster37/go-kibana-rest/v8"
+	"github.com/disaster37/go-kibana-rest/v8/kbapi"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	log "github.com/sirupsen/logrus"
 )
@@ -17,10 +19,10 @@ import (
 // Resource specification to handle kibana save object
 func resourceKibanaCopyObject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKibanaCopyObjectCreate,
-		Read:   resourceKibanaCopyObjectRead,
-		Update: resourceKibanaCopyObjectUpdate,
-		Delete: resourceKibanaCopyObjectDelete,
+		CreateContext: resourceKibanaCopyObjectCreate,
+		ReadContext:   resourceKibanaCopyObjectRead,
+		UpdateContext: resourceKibanaCopyObjectUpdate,
+		DeleteContext: resourceKibanaCopyObjectDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -81,12 +83,12 @@ func resourceKibanaCopyObject() *schema.Resource {
 }
 
 // Copy objects in Kibana
-func resourceKibanaCopyObjectCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaCopyObjectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	name := d.Get("name").(string)
 
 	err := copyObject(d, meta)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(name)
@@ -94,12 +96,12 @@ func resourceKibanaCopyObjectCreate(d *schema.ResourceData, meta interface{}) er
 	log.Infof("Copy objects %s successfully", name)
 	fmt.Printf("[INFO] Copy objects %s successfully", name)
 
-	return resourceKibanaCopyObjectRead(d, meta)
+	return resourceKibanaCopyObjectRead(ctx, d, meta)
 }
 
 // Read object on kibana
-func resourceKibanaCopyObjectRead(d *schema.ResourceData, meta interface{}) error {
-
+func resourceKibanaCopyObjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var err error
 	id := d.Id()
 	sourceSpace := d.Get("source_space").(string)
 	targetSpaces := convertArrayInterfaceToArrayString(d.Get("target_spaces").(*schema.Set).List())
@@ -123,14 +125,30 @@ func resourceKibanaCopyObjectRead(d *schema.ResourceData, meta interface{}) erro
 	// To avoid this hard code, we juste use force_update and overwrite field
 	// It make same result but in bad way on terraform spirit
 
-	d.Set("name", id)
-	d.Set("source_space", sourceSpace)
-	d.Set("target_spaces", targetSpaces)
-	d.Set("object", objects)
-	d.Set("include_reference", includeReference)
-	d.Set("overwrite", overwrite)
-	d.Set("create_new_copies", createNewCopies)
-	d.Set("force_update", false)
+	if err = d.Set("name", id); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("source_space", sourceSpace); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("target_spaces", targetSpaces); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("object", objects); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("include_reference", includeReference); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("overwrite", overwrite); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("create_new_copies", createNewCopies); err != nil {
+		return diag.FromErr(err)
+	}
+	if err = d.Set("force_update", false); err != nil {
+		return diag.FromErr(err)
+	}
 
 	log.Infof("Read resource %s successfully", id)
 	fmt.Printf("[INFO] Read resource %s successfully", id)
@@ -139,23 +157,23 @@ func resourceKibanaCopyObjectRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 // Update existing object in Kibana
-func resourceKibanaCopyObjectUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaCopyObjectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	id := d.Id()
 
 	err := copyObject(d, meta)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Infof("Updated resource %s successfully", id)
 	fmt.Printf("[INFO] Updated resource %s successfully", id)
 
-	return resourceKibanaCopyObjectRead(d, meta)
+	return resourceKibanaCopyObjectRead(ctx, d, meta)
 }
 
 // Delete object in Kibana is not supported
 // It just remove object from state
-func resourceKibanaCopyObjectDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceKibanaCopyObjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	d.SetId("")
 
