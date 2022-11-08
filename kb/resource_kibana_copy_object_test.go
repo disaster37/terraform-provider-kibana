@@ -27,7 +27,6 @@ func TestAccKibanaCopyObject(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testCheckKibanaCopyObjectExists("kibana_copy_object.test"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
