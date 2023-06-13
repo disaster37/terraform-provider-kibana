@@ -67,7 +67,7 @@ func resourceKibanaLogstashPipeline() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"pipeline_ordored": {
+						"pipeline_ordered": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
@@ -151,7 +151,7 @@ func resourceKibanaLogstashPipelineRead(ctx context.Context, d *schema.ResourceD
 			"pipeline_batch_size":        logstashPiepeline.Settings["pipeline.batch.size"],
 			"pipeline_batch_delay":       logstashPiepeline.Settings["pipeline.batch.delay"],
 			"pipeline_ecs_compatibility": logstashPiepeline.Settings["pipeline.ecs_compatibility"],
-			"pipeline_ordored":           logstashPiepeline.Settings["pipeline.ordered"],
+			"pipeline_ordered":           logstashPiepeline.Settings["pipeline.ordered"],
 			"queue_type":                 logstashPiepeline.Settings["queue.type"],
 			"queue_max_bytes":            logstashPiepeline.Settings["queue.max_bytes"],
 			"queue_checkpoint_writes":    logstashPiepeline.Settings["queue.checkpoint.writes"],
@@ -238,7 +238,7 @@ func createOrUpdateLogstashPipeline(d *schema.ResourceData, meta interface{}) (*
 				logstashPipeline.Settings["pipeline.batch.delay"] = value
 			case "pipeline_ecs_compatibility":
 				logstashPipeline.Settings["pipeline.ecs_compatibility"] = value
-			case "pipeline_ordored":
+			case "pipeline_ordered":
 				logstashPipeline.Settings["pipeline.ordered"] = value
 			case "queue_type":
 				logstashPipeline.Settings["queue.type"] = value
