@@ -101,6 +101,9 @@ func suppressEquivalentNDJSON(k, old, new string, d *schema.ResourceData) bool {
 		"migrationVersion":     nil,
 		"references":           nil,
 		"sort":                 nil,
+		"created_at":           nil,
+		"managed":              nil,
+		"typeMigrationVersion": nil,
 	}
 
 	// NDJSON mean sthat each line correspond to JSON struct
