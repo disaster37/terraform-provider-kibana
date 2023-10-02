@@ -47,7 +47,7 @@ See LICENSE.
 1. Fork it ( https://github.com/disaster37/terraform-provider-kibana/fork )
 2. Go to the right branch (7.x for Kibana 7) (`git checkout 8.x`)
 3. Create your feature branch (`git checkout -b my-new-feature`)
-4. Add feature, add acceptance test and tets your code (`KIBANA_URL=http://127.0.0.1:5601 KIBANA_USERNAME=elastic KIBANA_PASSWORD=changeme make testacc`)
+4. Add feature, add acceptance test and test your code (`KIBANA_URL=http://127.0.0.1:5601 KIBANA_USERNAME=elastic KIBANA_PASSWORD=changeme make testacc`)
 5. Commit your changes (`git commit -am 'Add some feature'`)
 6. Push to the branch (`git push origin my-new-feature`)
 7. Create a new Pull Request

@@ -36,7 +36,7 @@ resource kibana_logstash_pipeline "test" {
   - **pipeline_batch_size**: (optional)
   - **pipeline_batch_delay**: (optional)
   - **pipeline_ecs_compatibility**: (optional)
-  - **pipeline_ordored**: (optional)
+  - **pipeline_ordered**: (optional)
   - **queue_type**: (optional)
   - **queue_max_bytes**: (optional)
   - **queue_checkpoint_writes**: (optional)
